@@ -1,0 +1,108 @@
+:root {
+  color-scheme: light;
+
+  --color-page: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f1f5f9;
+  --color-surface-input: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-heading: #020617;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+
+  --color-accent: #0f766e;
+  --color-accent-strong: #0d9488;
+  --color-accent-soft: rgb(20 184 166 / 0.12);
+  --color-accent-border: rgb(13 148 136 / 0.45);
+  --color-accent-text: #0f766e;
+  --color-accent-gradient: linear-gradient(110deg, #059669, #0d9488 55%, #65a30d);
+  --color-accent-gradient-hover: linear-gradient(110deg, #10b981, #14b8a6 55%, #84cc16);
+  --color-nav-item-text: #0f172a;
+  --color-nav-hover-background: #effdfa;
+  --color-nav-hover-text: #0f766e;
+  --color-nav-active-background: linear-gradient(110deg, #0b817b, #11b6a5);
+  --color-nav-active-text: #ffffff;
+  --color-accent-guest: linear-gradient(110deg, rgb(5 150 105 / 0.18), rgb(13 148 136 / 0.18), rgb(101 163 13 / 0.18));
+  --color-accent-guest-hover: linear-gradient(110deg, rgb(5 150 105 / 0.3), rgb(13 148 136 / 0.3), rgb(101 163 13 / 0.3));
+  --color-accent-on: #ffffff;
+  --color-button-primary-text: #ffffff;
+  --color-button-guest-border: rgb(15 118 110 / 0.7);
+  --color-focus: rgb(13 148 136 / 0.25);
+  --color-option-hover: #226beb;
+  --color-option-hover-text: #ffffff;
+  --color-shadow: rgb(0 0 0 / 0.2);
+  --color-shadow-strong: rgb(0 0 0 / 0.4);
+  --color-white: #ffffff;
+
+  --color-danger-surface: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-danger-text: #b91c1c;
+  --color-danger-strong: #991b1b;
+  --color-danger-on-dark: #fecaca;
+  --color-code: #e2e8f0;
+  --color-code-text: #1e293b;
+  --color-login-page: #020617;
+  --color-login-surface: rgb(15 23 42 / 0.88);
+  --color-login-input: rgb(2 6 23 / 0.72);
+  --color-login-muted: #94a3b8;
+  --color-login-text: #f1f5f9;
+  --color-login-heading: #ffffff;
+  --color-login-border: rgb(51 65 85 / 0.8);
+  --color-glow-teal: rgb(20 184 166 / 0.2);
+  --color-glow-cyan: rgb(6 182 212 / 0.16);
+  --color-glow-green: rgb(16 185 129 / 0.12);
+  --color-glow-sweep-soft: rgb(45 212 191 / 0.05);
+  --color-glow-sweep: rgb(45 212 191 / 0.24);
+  --color-glow-sweep-bright: rgb(103 232 249 / 0.2);
+
+  --shadow-surface: 0 24px 70px -24px rgb(15 23 42 / 0.18);
+  --shadow-login: 0 24px 70px -24px rgb(0 0 0 / 0.55);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --color-page: #020617;
+  --color-surface: #0f172a;
+  --color-surface-raised: #020617;
+  --color-surface-input: rgb(2 6 23 / 0.72);
+  --color-border: #1e293b;
+  --color-border-strong: #334155;
+  --color-text: #e2e8f0;
+  --color-text-heading: #ffffff;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+
+  --color-accent: #2dd4bf;
+  --color-accent-strong: #5eead4;
+  --color-accent-soft: rgb(45 212 191 / 0.1);
+  --color-accent-border: rgb(45 212 191 / 0.45);
+  --color-accent-text: #99f6e4;
+  --color-accent-gradient: linear-gradient(110deg, #0b6663, #0d9189 55%, #10a99b);
+  --color-accent-gradient-hover: linear-gradient(110deg, #0d7772, #0fa69c 55%, #13b8a8);
+  --color-nav-item-text: #e2e8f0;
+  --color-nav-hover-background: #1e293b;
+  --color-nav-hover-text: #5eead4;
+  --color-nav-active-background: linear-gradient(110deg, #0b7775, #10a99b);
+  --color-nav-active-text: #ffffff;
+  --color-accent-guest: linear-gradient(110deg, rgb(11 102 99 / 0.38), rgb(13 145 137 / 0.38) 55%, rgb(16 169 155 / 0.38));
+  --color-accent-guest-hover: linear-gradient(110deg, rgb(11 102 99 / 0.58), rgb(13 145 137 / 0.58) 55%, rgb(16 169 155 / 0.58));
+  --color-accent-on: #020617;
+  --color-button-primary-text: #ffffff;
+  --color-button-guest-border: rgb(45 212 191 / 0.65);
+  --color-focus: rgb(45 212 191 / 0.25);
+  --color-option-hover: #226beb;
+  --color-option-hover-text: #ffffff;
+  --color-shadow: rgb(0 0 0 / 0.2);
+  --color-shadow-strong: rgb(0 0 0 / 0.4);
+  --color-white: #ffffff;
+
+  --color-danger-surface: rgb(127 29 29 / 0.25);
+  --color-danger-border: #7f1d1d;
+  --color-danger-text: #fca5a5;
+  --color-danger-strong: #fecaca;
+  --color-code: #020617;
+  --color-code-text: #e2e8f0;
+}
