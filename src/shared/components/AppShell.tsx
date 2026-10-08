@@ -4,6 +4,7 @@ import {
   BellDot,
   BriefcaseBusiness,
   ChartPie,
+  ChevronDown,
   ClipboardList,
   Cpu,
   DatabaseZap,
@@ -13,6 +14,7 @@ import {
   Gauge,
   Globe2,
   Home,
+  LogOut,
   Menu,
   Moon,
   PanelLeftClose,
@@ -21,13 +23,13 @@ import {
   Sun,
   Target,
   UserRound,
-  Waves,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n/LanguageContext';
+import { supabase } from '../lib/supabase';
 import LanguageSelector from './LanguageSelector';
 
 export default function AppShell() {
@@ -38,10 +40,28 @@ export default function AppShell() {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isUserMenuOpen) {
+      return;
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [isUserMenuOpen]);
 
   useEffect(() => {
     if (!isMobileMenuOpen) {
@@ -72,6 +92,25 @@ export default function AppShell() {
     ? t('menu.anonymousEmail')
     : userProfile?.email ?? user?.email ?? (!user ? t('menu.guest') : '');
   const themeLabel = theme === 'dark' ? t('menu.switchToLight') : t('menu.switchToDark');
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    setSignOutError(false);
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      setIsUserMenuOpen(false);
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+      setSignOutError(true);
+      setIsSigningOut(false);
+    }
+  }
+
   const demoMenuItems = [
     { to: '/demo-1', labelKey: 'menu.test1', icon: FolderKanban },
     { to: '/demo-2', labelKey: 'menu.test2', icon: BriefcaseBusiness },
@@ -273,23 +312,62 @@ export default function AppShell() {
         <footer className={`ui-sidebar-footer mx-2 shrink-0 border-t px-1 pb-4 pt-3 ${isCollapsed ? 'md:mx-1 md:px-0' : ''}`}>
           <LanguageSelector isCollapsed={isCollapsed} />
 
-          <div className={`ui-user-card flex min-w-0 items-center gap-2 rounded-xl px-2 py-2 ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}>
-            <span className="ui-user-avatar flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-              <UserRound size={16} aria-hidden="true" />
-            </span>
-            <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
-              <span className="ui-heading block truncate text-xs font-semibold">{userName}</span>
-              <span className="ui-muted block truncate text-[0.625rem]">
-                {userSubtitle}
+          <div className="relative">
+            {isUserMenuOpen && (
+              <div id="sidebar-user-menu" className="ui-user-menu absolute bottom-[calc(100%+0.65rem)] left-0 z-10 w-60 rounded-2xl p-2">
+                <div className="ui-user-menu-identity px-3 py-2">
+                  <p className="ui-heading truncate text-sm font-semibold">{userName}</p>
+                  <p className="ui-muted truncate text-xs">{userSubtitle}</p>
+                </div>
+                <div className="ui-user-menu-divider my-1" />
+                {signOutError && (
+                  <p role="alert" className="ui-user-menu-error px-3 py-2 text-xs">
+                    {t('menu.signOutError')}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={isSigningOut}
+                  className="ui-user-menu-action flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium disabled:cursor-wait disabled:opacity-60"
+                >
+                  <LogOut size={17} aria-hidden="true" />
+                  {isSigningOut ? t('menu.signingOut') : t('menu.signOut')}
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              aria-label={t('menu.accountOptions')}
+              aria-expanded={isUserMenuOpen}
+              aria-controls={isUserMenuOpen ? 'sidebar-user-menu' : undefined}
+              onClick={() => {
+                setSignOutError(false);
+                setIsUserMenuOpen((open) => !open);
+              }}
+              className={`ui-user-card flex w-full min-w-0 items-center gap-2 rounded-xl px-2 py-2 text-left ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+            >
+              <span className="ui-user-avatar flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+                <UserRound size={16} aria-hidden="true" />
               </span>
-            </span>
-            <Waves size={15} className={`ui-muted shrink-0 ${isCollapsed ? 'md:hidden' : ''}`} aria-hidden="true" />
+              <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
+                <span className="ui-heading block truncate text-xs font-semibold">{userName}</span>
+                <span className="ui-muted block truncate text-[0.625rem]">
+                  {userSubtitle}
+                </span>
+              </span>
+              <ChevronDown
+                size={15}
+                className={`ui-muted shrink-0 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''} ${isCollapsed ? 'md:hidden' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
           </div>
           <p className={`ui-muted mt-3 text-xs ${isCollapsed ? 'md:hidden' : ''}`}>{t('menu.version')}</p>
         </footer>
       </aside>
 
-      <main className="ui-main-content min-w-0 flex-1 px-4 pb-6 pt-20 sm:px-6 md:px-8 md:pt-8">
+      <main className="ui-main-content min-w-0 flex-1 px-4 pb-6 pt-20 sm:px-6 md:px-6 md:pt-8">
         <Outlet />
       </main>
     </div>

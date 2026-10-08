@@ -10,7 +10,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 function getInitialTheme(): Theme {
-  return localStorage.getItem('wavecore-theme') === 'dark' ? 'dark' : 'light';
+  return 'dark';
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

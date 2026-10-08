@@ -16,7 +16,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       <section className="ui-home-hero ui-surface relative overflow-hidden rounded-3xl p-6 sm:p-9 lg:p-11">
         <div className="relative z-10 max-w-3xl lg:pr-80">
           <span className="ui-accent-badge inline-flex items-center gap-2 rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em]">
@@ -30,7 +30,7 @@ export default function Home() {
             {t('home.subtitle')}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/dashboard" className="ui-button ui-button-primary inline-flex items-center gap-2 px-5 py-3 text-sm">
+            <Link to="/dashboard" className="ui-button ui-button-primary ui-home-dashboard-button inline-flex items-center gap-2 px-5 py-3 text-sm">
               {t('home.openDashboard')}
               <ArrowRight size={16} aria-hidden="true" />
             </Link>

@@ -19,6 +19,12 @@
   --color-accent-text: #0f766e;
   --color-accent-gradient: linear-gradient(110deg, #059669, #0d9488 55%, #65a30d);
   --color-accent-gradient-hover: linear-gradient(110deg, #10b981, #14b8a6 55%, #84cc16);
+  --color-home-dashboard-gradient: linear-gradient(110deg, #0b6663, #0d9189 55%, #10a99b);
+  --color-home-dashboard-gradient-hover: linear-gradient(110deg, #0d7772, #0fa69c 55%, #13b8a8);
+  --color-home-card-accent-strategy: linear-gradient(90deg, #06b6d4, #2563eb);
+  --color-home-card-accent-market: linear-gradient(90deg, #a855f7, #ec4899);
+  --color-home-card-accent-iot: linear-gradient(90deg, #10b981, #06b6d4);
+  --color-home-card-glow: rgb(6 182 212 / 0.2);
   --color-nav-item-text: #0f172a;
   --color-nav-hover-background: #effdfa;
   --color-nav-hover-text: #0f766e;
@@ -82,6 +88,9 @@
   --color-accent-text: #99f6e4;
   --color-accent-gradient: linear-gradient(110deg, #0b6663, #0d9189 55%, #10a99b);
   --color-accent-gradient-hover: linear-gradient(110deg, #0d7772, #0fa69c 55%, #13b8a8);
+  --color-home-dashboard-gradient: var(--color-accent-gradient);
+  --color-home-dashboard-gradient-hover: var(--color-accent-gradient-hover);
+  --color-home-card-glow: rgb(6 182 212 / 0.3);
   --color-nav-item-text: #e2e8f0;
   --color-nav-hover-background: #1e293b;
   --color-nav-hover-text: #5eead4;
