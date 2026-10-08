@@ -24,7 +24,7 @@ import TestLogin from './features/test_login/TestLogin';
 
 type TranslationKey = Parameters<ReturnType<typeof useTranslation>['t']>[0];
 
-function AuthenticatedLayout() {
+function RootRoute() {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation();
 
@@ -37,7 +37,7 @@ function AuthenticatedLayout() {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Login />;
   }
 
   return <AppShell />;
@@ -82,25 +82,11 @@ const demoPages = [
 export default function App() {
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={<Login />}
-      />
-      <Route path="/test_login" element={<TestLogin />} />
-      <Route element={<AuthenticatedLayout />}>
+      <Route path="/" element={<RootRoute />}>
         <Route index element={<Home />} />
-        <Route
-          path="stack"
-          element={<SamplePage icon={Cpu} titleKey="menu.stack" descriptionKey="page.stack" />}
-        />
-        <Route
-          path="dashboard"
-          element={<SamplePage icon={Gauge} titleKey="menu.dashboard" descriptionKey="page.dashboard" />}
-        />
-        <Route
-          path="iot"
-          element={<SamplePage icon={Radio} titleKey="menu.iot" descriptionKey="page.iot" />}
-        />
+        <Route path="stack" element={<SamplePage icon={Cpu} titleKey="menu.stack" descriptionKey="page.stack" />} />
+        <Route path="dashboard" element={<SamplePage icon={Gauge} titleKey="menu.dashboard" descriptionKey="page.dashboard" />} />
+        <Route path="iot" element={<SamplePage icon={Radio} titleKey="menu.iot" descriptionKey="page.iot" />} />
         {demoPages.map(({ path, icon, titleKey, descriptionKey }) => (
           <Route
             key={path}
@@ -109,7 +95,9 @@ export default function App() {
           />
         ))}
       </Route>
+      <Route path="/test_login" element={<TestLogin />} />
       <Route path="/home" element={<Navigate to="/" replace />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

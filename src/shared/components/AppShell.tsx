@@ -103,7 +103,7 @@ export default function AppShell() {
         throw error;
       }
       setIsUserMenuOpen(false);
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Failed to sign out:', error);
       setSignOutError(true);
@@ -363,7 +363,7 @@ export default function AppShell() {
               />
             </button>
           </div>
-          <p className={`ui-muted mt-3 text-xs ${isCollapsed ? 'md:hidden' : ''}`}>{t('menu.version')}</p>
+          <p className={`ui-muted mt-3 text-xs ${isCollapsed ? 'md:hidden' : ''}`}>Ver 1.1</p>
         </footer>
       </aside>
 
