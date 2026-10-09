@@ -15,6 +15,7 @@ type FailedQuestion = {
 };
 
 const errorTranslationKeys: Record<ChatApiErrorKind, Parameters<ReturnType<typeof useTranslation>['t']>[0]> = {
+  auth: 'agentCompany.errorAuth',
   network: 'agentCompany.errorNetwork',
   timeout: 'agentCompany.errorTimeout',
   request: 'agentCompany.errorRequest',

@@ -7,7 +7,7 @@ Después de iniciar sesión se abre `/test_login`, un explorador de diagnóstico
 ## Configuración local
 
 1. Instala las dependencias con `npm install`.
-2. Copia `.env.example` a `.env` y configura `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` con la URL del proyecto y su clave pública (anon/publishable), y `VITE_SUPABASE_TABLES` con una lista separada por comas de tablas del esquema `public` que quieras mostrar. `VITE_AGENT_COMPANY_API_URL` es opcional; por defecto, el chat usa `https://wavecore-api-company.vercel.app` tanto en desarrollo como en producción. Para usar un backend local, configúrala explícitamente como `http://localhost:3000`. No uses una `service_role` ni una clave secreta en el cliente.
+2. Copia `.env.example` a `.env` y configura `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` con la URL del proyecto y su clave pública (anon/publishable), y `VITE_SUPABASE_TABLES` con una lista separada por comas de tablas del esquema `public` que quieras mostrar. El chat llama a `/api/chat` en el mismo origen: Vite lo reenvía al backend desplegado durante el desarrollo y Vercel lo reenvía en producción, evitando depender de CORS desde el navegador. `VITE_AGENT_COMPANY_API_URL` es opcional y cambia el destino del proxy local; por defecto usa `https://wavecore-api-company.vercel.app`. Para usar un backend local, configúrala como `http://localhost:3000`. No uses una `service_role` ni una clave secreta en el cliente.
 3. En Supabase, habilita el proveedor de acceso anónimo y el proveedor Email en los ajustes de Authentication.
 4. Inicia la aplicación con `npm run dev`.
 

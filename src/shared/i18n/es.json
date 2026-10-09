@@ -98,6 +98,7 @@
   "agentCompany.you": "Tú",
   "agentCompany.assistant": "Asistente",
   "agentCompany.retry": "Reintentar",
+  "agentCompany.errorAuth": "Tu sesión no está disponible o ha caducado. Inicia sesión de nuevo e inténtalo otra vez.",
   "agentCompany.errorNetwork": "No se pudo conectar con el asistente. Comprueba tu conexión e inténtalo de nuevo.",
   "agentCompany.errorTimeout": "La solicitud tardó demasiado. Puedes volver a intentarlo.",
   "agentCompany.errorRequest": "La pregunta no se pudo procesar. Revísala e inténtalo de nuevo.",

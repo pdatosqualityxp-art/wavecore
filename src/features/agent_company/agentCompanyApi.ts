@@ -1,8 +1,10 @@
-const DEFAULT_PRODUCTION_URL = 'https://wavecore-api-company.vercel.app';
+import { supabase } from '../../shared/lib/supabase';
+
 const REQUEST_TIMEOUT_MS = 55_000;
 const MAX_NETWORK_ATTEMPTS = 2;
+const CHAT_API_PATH = '/api/chat';
 
-export type ChatApiErrorKind = 'network' | 'timeout' | 'request' | 'response' | 'server';
+export type ChatApiErrorKind = 'auth' | 'network' | 'timeout' | 'request' | 'response' | 'server';
 
 export class ChatApiError extends Error {
   constructor(readonly kind: ChatApiErrorKind, readonly status?: number) {
@@ -15,12 +17,6 @@ type ChatResponse = {
   success: true;
   reply: string;
 };
-
-function getApiBaseUrl(): string {
-  const configuredUrl = import.meta.env.VITE_AGENT_COMPANY_API_URL;
-  const baseUrl = configuredUrl?.trim() || DEFAULT_PRODUCTION_URL;
-  return baseUrl.replace(/\/+$/, '');
-}
 
 function isChatResponse(value: unknown): value is ChatResponse {
   return typeof value === 'object'
@@ -41,20 +37,44 @@ export async function askCompanyAssistant(message: string): Promise<string> {
     throw new ChatApiError('request');
   }
 
+  let accessToken: string;
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    const session = data.session;
+    if (
+      error
+      || !session?.access_token
+      || (session.expires_at !== undefined && session.expires_at <= Date.now() / 1000)
+    ) {
+      throw new ChatApiError('auth');
+    }
+    accessToken = session.access_token;
+  } catch {
+    throw new ChatApiError('auth');
+  }
+
   for (let attempt = 0; attempt < MAX_NETWORK_ATTEMPTS; attempt += 1) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/chat`, {
+      const response = await fetch(CHAT_API_PATH, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ message }),
         signal: controller.signal,
       });
 
       if (!response.ok) {
-        throw new ChatApiError(response.status === 400 ? 'request' : 'server', response.status);
+        const kind = response.status === 400
+          ? 'request'
+          : response.status === 401
+            ? 'auth'
+            : 'server';
+        throw new ChatApiError(kind, response.status);
       }
 
       let data: unknown;

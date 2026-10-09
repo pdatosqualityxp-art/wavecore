@@ -98,6 +98,7 @@
   "agentCompany.you": "You",
   "agentCompany.assistant": "Assistant",
   "agentCompany.retry": "Try again",
+  "agentCompany.errorAuth": "Your session is unavailable or has expired. Sign in again and try once more.",
   "agentCompany.errorNetwork": "Unable to connect to the assistant. Check your connection and try again.",
   "agentCompany.errorTimeout": "The request took too long. You can try again.",
   "agentCompany.errorRequest": "The question could not be processed. Check it and try again.",

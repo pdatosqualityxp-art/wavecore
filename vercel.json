@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "https://wavecore-api-company.vercel.app/api/chat"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

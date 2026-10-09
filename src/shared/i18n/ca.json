@@ -98,6 +98,7 @@
   "agentCompany.you": "Tu",
   "agentCompany.assistant": "Assistent",
   "agentCompany.retry": "Torna-ho a provar",
+  "agentCompany.errorAuth": "La sessió no està disponible o ha caducat. Inicia sessió de nou i torna-ho a provar.",
   "agentCompany.errorNetwork": "No s'ha pogut connectar amb l'assistent. Comprova la connexió i torna-ho a provar.",
   "agentCompany.errorTimeout": "La sol·licitud ha trigat massa. Pots tornar-ho a provar.",
   "agentCompany.errorRequest": "No s'ha pogut processar la pregunta. Revisa-la i torna-ho a provar.",
