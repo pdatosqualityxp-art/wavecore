@@ -77,8 +77,11 @@ describe('AppShell', () => {
     expect(screen.getByRole('navigation', { name: 'Navegación principal' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Inicio' })).toHaveAttribute('href', '/');
     expect(screen.getByText('Finanzas')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Stack Tecnológico' })).toHaveAttribute('href', '/stack');
-    expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
+    const dashboardLink = screen.getByRole('link', { name: 'Dashboard Ventas' });
+    const agentCompanyLink = screen.getByRole('link', { name: 'Consulta de empresa' });
+    expect(dashboardLink).toHaveAttribute('href', '/dashboard');
+    expect(agentCompanyLink).toHaveAttribute('href', '/agent-company');
+    expect(dashboardLink.compareDocumentPosition(agentCompanyLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByText('Internet of Things')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'IoT' })).toHaveAttribute('href', '/iot');
     expect(await screen.findByText('Alex Rivera')).toBeInTheDocument();

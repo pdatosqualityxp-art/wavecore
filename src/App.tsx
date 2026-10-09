@@ -19,6 +19,8 @@ import AppShell from './shared/components/AppShell';
 import { useAuth } from './shared/context/AuthContext';
 import { useTranslation } from './shared/i18n/LanguageContext';
 import Login from './features/auth/Login';
+import DashboardVentas from './features/dashboard_ventas/DashboardVentas';
+import AgentCompany from './features/agent_company/AgentCompany';
 import Home from './features/home/Home';
 import TestLogin from './features/test_login/TestLogin';
 
@@ -85,7 +87,8 @@ export default function App() {
       <Route path="/" element={<RootRoute />}>
         <Route index element={<Home />} />
         <Route path="stack" element={<SamplePage icon={Cpu} titleKey="menu.stack" descriptionKey="page.stack" />} />
-        <Route path="dashboard" element={<SamplePage icon={Gauge} titleKey="menu.dashboard" descriptionKey="page.dashboard" />} />
+        <Route path="dashboard" element={<DashboardVentas />} />
+        <Route path="agent-company" element={<AgentCompany />} />
         <Route path="iot" element={<SamplePage icon={Radio} titleKey="menu.iot" descriptionKey="page.iot" />} />
         {demoPages.map(({ path, icon, titleKey, descriptionKey }) => (
           <Route

@@ -1,72 +1,95 @@
 # AGENTS.md
 
-## 1. Stack
+## 1. Stack actual del proyecto
 
-* React + Vite + TypeScript.
-* Tailwind CSS.
-* `lucide-react` para iconos.
-* Supabase mediante `@supabase/supabase-js`.
-* Vitest + React Testing Library para tests.
+Este proyecto usa una configuración concreta y validada en la repo actual:
 
-Si el proyecto no está inicializado, utilizar Vite con la plantilla `react-ts` e instalar las dependencias necesarias.
+* React 18 + Vite + TypeScript
+* Tailwind CSS 4
+* React Router
+* `lucide-react` para iconos
+* `@supabase/supabase-js` para autenticación y acceso a Supabase
+* Vitest + React Testing Library para tests
 
-## 2. Arquitectura (Feature-Driven Architecture)
+Si se crea o recrea la base del proyecto, debe mantenerse la plantilla `react-ts` de Vite y las dependencias del stack actual.
 
-Utilizar una arquitectura modular orientada a funcionalidades:
+## 2. Estructura de archivos y arquitectura
+
+La estructura sigue un enfoque modular por funcionalidad, con algunos módulos ya presentes en la solución actual:
 
 ```text
 src/
-├── config/              # Configuración y constantes globales
-├── design/              # Tokens, paleta y estilos globales reutilizables
-│   ├── tokens.css       # Variables semánticas de colores, superficies y sombras
-│   └── components.css   # Clases visuales reutilizables para páginas y componentes
-├── styles.css           # Tailwind, estilos base e imports del sistema de diseño
-├── shared/
-│   ├── components/      # Componentes reutilizables
-│   ├── context/         # Contextos globales
-│   └── i18n/            # Traducciones
+├── App.tsx                 # Rutas principales de la aplicación
+├── main.tsx                # Arranque de la app
+├── styles.css              # Tailwind + imports del sistema de diseño
+├── assets/
+│   └── logo.png            # Logo de la app
+├── design/
+│   ├── tokens.css          # Tokens semánticos de color, superficies, texto y estados
+│   └── components.css      # Clases reutilizables del sistema visual (`ui-*`)
 ├── features/
+│   ├── auth/
+│   │   ├── Login.tsx
+│   │   └── Login.test.tsx
 │   ├── home/
-│   ├── info/
-│   └── description/
-└── assets/              # Recursos estáticos
+│   │   └── Home.tsx
+│   └── test_login/
+│       ├── TestLogin.tsx
+│       └── TestLogin.test.tsx
+├── shared/
+│   ├── components/
+│   │   ├── AppShell.tsx
+│   │   ├── LanguageSelector.tsx
+│   │   └── AppShell.test.tsx
+│   ├── context/
+│   │   ├── AuthContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── i18n/
+│   │   ├── LanguageContext.tsx
+│   │   ├── ca.json
+│   │   ├── es.json
+│   │   └── en.json
+│   └── lib/
+│       └── supabase.ts
+├── test/
+│   └── setup.ts
+└── vite-env.d.ts
 ```
 
-Mantener la lógica específica de cada funcionalidad dentro de su correspondiente directorio en `features/`.
+La lógica de autenticación, tema y traducción vive en `shared/context` y `shared/i18n`, mientras que cada funcionalidad concreta debe mantenerse dentro de `features/`.
 
 ## 3. Sistema centralizado de diseño
 
-Todas las páginas, pantallas y visores deben consumir los estilos y colores del sistema centralizado; no definir paletas propias dentro de una feature.
+La base visual del proyecto debe reutilizar el sistema de diseño centralizado y no definir paletas o tokens ad hoc por feature.
 
-* Definir y cambiar la paleta, superficies, texto, estados, acentos, sombras y colores de interacción en `src/design/tokens.css`, mediante variables CSS semánticas.
-* Definir patrones visuales reutilizables en `src/design/components.css` mediante clases `ui-*` (por ejemplo, `ui-page`, `ui-surface`, `ui-input`, `ui-button-primary`, `ui-alert`).
-* Importar estos archivos desde `src/styles.css`; no importar tokens ni crear hojas de estilo de paleta en cada feature.
-* En TSX, usar las clases semánticas `ui-*` para color, fondo, borde, sombra y estados. Tailwind puede usarse para layout, espaciado, tipografía y responsive.
-* Si una feature necesita un patrón visual nuevo, añadir una clase semántica reutilizable a `components.css` y sus valores de color a `tokens.css`; no añadir valores hex, RGB ni utilidades de paleta Tailwind en el JSX.
-* Los estilos propios de una feature se limitan a comportamiento visual específico que no sea un token de marca (por ejemplo, animaciones decorativas); sus colores deben referenciar variables de `tokens.css`.
-* Los temas claro y oscuro se resuelven modificando variables semánticas en `tokens.css`, no duplicando variantes de color por pantalla.
+* `src/design/tokens.css` contiene variables semánticas para colores, fondos, texto, estados, sombras y acentos.
+* `src/design/components.css` define patrones reutilizables con clases `ui-*` (por ejemplo `ui-page`, `ui-surface`, `ui-input`, `ui-nav-item`, `ui-user-card`).
+* `src/styles.css` importa Tailwind y los archivos del sistema de diseño.
+* En JSX se deben usar clases semánticas `ui-*` para color, superficie, borde, estado y estructura visual. Tailwind se usa principalmente para layout, spacing, tipografía y responsive.
+* Si se crea un patrón visual nuevo, debe añadirse como clase reutilizable al sistema central y no como estilos aislados en cada feature.
+* Las nuevas páginas deben seguir la jerarquía visual y el nivel de acabado de Inicio (`/`) y Dashboard Ventas (`/dashboard`), eligiendo como referencia el patrón más cercano a su propósito. Reutilizar los componentes compartidos y el sistema centralizado; no copiar estilos locales ni crear paletas propias.
 
-## 4. UI y Responsive
+## 4. UI y responsive
 
-El layout debe utilizar una navegación lateral (`Sidebar`) en desktop y una navegación tipo drawer en móvil.
+El layout principal está implementado con `AppShell` y debe seguir el patrón actual del proyecto:
 
 ### Desktop
 
-* Sidebar desplegado con logo, tema, navegación, idioma y perfil.
-* Sidebar plegado mostrando únicamente iconos.
-* Botón para alternar entre ambos estados.
+* Sidebar lateral con logo, tema, navegación, idioma y perfil.
+* Opción de colapsar/expandir el menú.
+* Usuario con avatar y menú de acciones.
 
 ### Móvil
 
 * Barra superior fija con menú, logo y selector de tema.
-* Menú lateral tipo drawer al abrirse.
-* Fondo traslúcido y botón de cierre.
+* Drawer lateral con la navegación.
+* Fondo translúcido y cierre con botón o Escape.
 
-La interfaz debe ser responsive y mantener compatibilidad con modo claro y oscuro.
+La interfaz debe ser responsive y compatible con modo claro y oscuro.
 
-## 5. Navegación
+## 5. Navegación y rutas
 
-El menú principal contiene:
+La navegación principal del proyecto es la que existe en la app actual:
 
 * Inicio → `/`
 * Sección Finanzas:
@@ -74,51 +97,51 @@ El menú principal contiene:
   * Dashboard → `/dashboard`
 * Sección Internet of Things:
   * IoT → `/iot`
+* Páginas de pruebas/demo adicionales:
+  * `/demo-1` ... `/demo-15`
 
-Los elementos de navegación se muestran en una región desplazable. En escritorio, permitir plegar el menú; en móvil, utilizar una barra superior y un drawer lateral.
-
-El logo se encuentra en `src/assets/logo.png`.
+La navegación se gestiona con `react-router-dom` y el shell común en `src/shared/components/AppShell.tsx`.
 
 El pie del menú incluye:
 
 * Selector de idioma.
-* Nombre del usuario activo de Supabase.
+* Nombre del usuario autenticado.
 * Versión de la aplicación: `Ver 1.1`.
-
-Utilizar `lucide-react` para los iconos.
 
 ## 6. Tema
 
-Implementar un `ThemeContext` global en:
+El sistema de tema global debe implementarse en:
 
 ```text
 src/shared/context/ThemeContext.tsx
 ```
 
-El sistema debe:
+Requisitos del proyecto actual:
 
-* Soportar modo claro y oscuro.
-* Aplicar la clase `dark` de Tailwind al elemento raíz.
-* Persistir la preferencia en `localStorage`.
-* Actualizarse inmediatamente al cambiar el tema.
+* Soportar light/dark.
+* Aplicar la clase `dark` al elemento raíz (`document.documentElement`).
+* Persistir la preferencia en `localStorage` (`wavecore-theme`).
+* Actualizar el estado inmediatamente al cambiar el tema.
 
 ## 7. Internacionalización
 
-Soportar exclusivamente:
+El proyecto soporta exclusivamente:
 
 * Català (`ca`)
 * Español (`es`)
 * English (`en`)
 
-Las traducciones deben estar centralizadas en:
+Las traducciones están centralizadas en:
 
 ```text
 src/shared/i18n/
 ```
 
+El contexto de idioma está en `src/shared/i18n/LanguageContext.tsx` y usa `ca.json`, `es.json` y `en.json`.
+
 ### Regla obligatoria
 
-No escribir textos estáticos de UI directamente en los componentes.
+No escribir textos estáticos de UI directamente en componentes.
 
 Incorrecto:
 
@@ -129,27 +152,51 @@ Incorrecto:
 Correcto:
 
 ```tsx
-<h1>{t("dashboard.title")}</h1>
+<h1>{t('menu.dashboard')}</h1>
 ```
 
-Todo texto estático debe existir en los archivos de traducción (`es.json`, `ca.json`, `en.json`).
-
-Los datos dinámicos procedentes de Supabase no necesitan traducción.
+Todo texto visible de la interfaz debe existir en los archivos de traducción.
 
 ## 8. Supabase y seguridad
 
-* Utilizar `@supabase/supabase-js`.
-* Leer la configuración desde variables de entorno:
+La integración actual usa `@supabase/supabase-js` y debe leer la configuración desde variables de entorno.
 
-  * `VITE_SUPABASE_URL`
-  * `VITE_SUPABASE_ANON_KEY`
-* Nunca exponer claves secretas (`sb_secret_...`) en el código cliente.
+Variables requeridas:
+
+* `VITE_SUPABASE_URL`
+* `VITE_SUPABASE_ANON_KEY`
+* `VITE_SUPABASE_TABLES`
+
+`src/shared/lib/supabase.ts` debe validar que esas variables existan antes de crear el cliente. Nunca exponer claves secretas (`sb_secret_...`) en código del cliente.
+
+En este proyecto, la autenticación se integra con Supabase y la carga del perfil del usuario se hace usando la tabla `z_users` cuando existe. Las políticas RLS y permisos de lectura deben respetar el modelo de invitado anónimo y la sesión activa.
 
 ## 9. Testing
 
-Utilizar Vitest + React Testing Library.
+Se usa Vitest + React Testing Library.
 
 * Nombrar los tests como `[Componente].test.tsx`.
-* Colocarlos junto al componente o en `/tests`.
+* Colocarlos junto al componente o en `src/test` cuando correspondera.
 * Mockear Supabase y servicios externos en tests unitarios.
-* Añadir tests para la lógica y comportamientos relevantes.
+* Añadir tests para comportamientos relevantes: navegación, autenticación, tema, idioma y rendering de componentes.
+
+## 10. Convenciones de trabajo
+
+* Mantener la arquitectura actual del repo; no introducir patrones diferentes solo por preferencia personal.
+* Preferir cambios pequeños y coherentes con el diseño central ya existente.
+* Reusar `Header`, `AppShell`, `ThemeContext`, `LanguageContext` y componentes de `shared` antes de crear duplicados.
+* Si se agregan nuevas rutas o features, mantenerlas alineadas con el shell principal y con el modelo de i18n.
+
+## 11. Patrón de nuevas páginas
+
+Usar Dashboard Ventas como referencia de calidad funcional y visual para las nuevas páginas de producto, especialmente las páginas analíticas. Consultar `src/features/dashboard_ventas/DashboardVentas.tsx`, sus estilos semánticos en `src/design/components.css` y la especificación `spec/003.dashboardVentas.md`. Adaptar los elementos al propósito de cada página; no replicar sus métricas, rankings o filtros cuando no correspondan.
+
+* Ocupar el ancho de contenido disponible dentro de `AppShell`, como Inicio y Dashboard Ventas; no añadir límites de ancho arbitrarios que hagan que la página se vea más estrecha.
+* Componer la página con una cabecera clara (icono, título y descripción), controles relevantes y secciones de contenido ordenadas. En páginas de indicadores, priorizar tarjetas KPI y paneles/gráficos con la misma jerarquía visual que el dashboard.
+* Conectar métricas y visualizaciones a la fuente real de datos del producto. No usar datos simulados, muestras SQL ni cifras de ejemplo como contenido de producción. Agregar datos de forma que las relaciones descriptivas no dupliquen importes o conteos.
+* Ofrecer filtros sólo cuando sean útiles; explicar su alcance en la interfaz y actualizar de forma consistente todas las métricas y visualizaciones afectadas. Mantener accesible el estado seleccionado.
+* Cubrir carga, error y ausencia de datos con estados explícitos y traducidos. No representar errores como ceros ni ocultarlos mediante fallbacks que parezcan resultados válidos.
+* En gráficos, mostrar los valores relevantes también como texto accesible; el color no debe ser el único medio para interpretar los datos. Animar de forma discreta y respetar `prefers-reduced-motion`.
+* Diseñar primero para móvil y adaptar tarjetas, filtros, gráficos y paneles a escritorio sin desbordamiento horizontal. Mantener contraste y legibilidad en temas claro y oscuro.
+* Centralizar colores y patrones nuevos en `tokens.css` y `components.css`, y traducir todo el texto estático visible y accesible a `ca`, `es` y `en`. No introducir textos fijos ni paletas de color dentro de la feature.
+* Añadir pruebas con servicios externos mockeados para cálculos, filtros, estados y visualizaciones relevantes; documentar los comportamientos de aceptación propios de la página.

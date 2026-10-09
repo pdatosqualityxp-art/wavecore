@@ -16,6 +16,7 @@ import {
   Home,
   LogOut,
   Menu,
+  MessageCircle,
   Moon,
   PanelLeftClose,
   Radio,
@@ -261,15 +262,6 @@ export default function AppShell() {
             <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.finance')}</span>
           </div>
           <NavLink
-            to="/stack"
-            title={isCollapsed ? t('menu.stack') : undefined}
-            aria-label={t('menu.stack')}
-            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
-          >
-            <Cpu size={19} aria-hidden="true" />
-            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.stack')}</span>
-          </NavLink>
-          <NavLink
             to="/dashboard"
             title={isCollapsed ? t('menu.dashboard') : undefined}
             aria-label={t('menu.dashboard')}
@@ -277,6 +269,15 @@ export default function AppShell() {
           >
             <BarChart3 size={19} aria-hidden="true" />
             <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.dashboard')}</span>
+          </NavLink>
+          <NavLink
+            to="/agent-company"
+            title={isCollapsed ? t('menu.agentCompany') : undefined}
+            aria-label={t('menu.agentCompany')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <MessageCircle size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.agentCompany')}</span>
           </NavLink>
 
           <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>
