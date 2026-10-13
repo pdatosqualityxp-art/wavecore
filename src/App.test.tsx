@@ -34,6 +34,7 @@ describe('App routes', () => {
       const query = {
         select: vi.fn(),
         eq: vi.fn(),
+        order: vi.fn().mockResolvedValue({ data: [], error: null }),
         maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
       };
       query.select.mockReturnValue(query);
@@ -79,6 +80,10 @@ describe('App routes', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Consulta de empresa' }));
     expect(await screen.findByRole('heading', { name: 'Asistente virtual corporativo' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Consulta de empresa' })).toHaveAttribute('aria-current', 'page');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Repositorio' }));
+    expect(await screen.findByRole('heading', { name: 'Repositorio documental' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Repositorio' })).toHaveAttribute('aria-current', 'page');
 
     fireEvent.click(screen.getByRole('link', { name: 'Dashboard Ventas' }));
     expect(await screen.findByRole('heading', { name: 'Resumen comercial' })).toBeInTheDocument();

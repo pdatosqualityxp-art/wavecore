@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Cpu,
   DatabaseZap,
+  FileStack,
   Factory,
   FileText,
   FolderKanban,
@@ -278,6 +279,19 @@ export default function AppShell() {
           >
             <MessageCircle size={19} aria-hidden="true" />
             <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.agentCompany')}</span>
+          </NavLink>
+
+          <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.documentation')}</span>
+          </div>
+          <NavLink
+            to="/agent-cfo"
+            title={isCollapsed ? t('menu.documentRepository') : undefined}
+            aria-label={t('menu.documentRepository')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <FileStack size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.documentRepository')}</span>
           </NavLink>
 
           <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>

@@ -21,6 +21,7 @@ import { useTranslation } from './shared/i18n/LanguageContext';
 import Login from './features/auth/Login';
 import DashboardVentas from './features/dashboard_ventas/DashboardVentas';
 import AgentCompany from './features/agent_company/AgentCompany';
+import AgentCFO from './features/agent_cfo/AgentCFO';
 import Home from './features/home/Home';
 import TestLogin from './features/test_login/TestLogin';
 
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="stack" element={<SamplePage icon={Cpu} titleKey="menu.stack" descriptionKey="page.stack" />} />
         <Route path="dashboard" element={<DashboardVentas />} />
         <Route path="agent-company" element={<AgentCompany />} />
+        <Route path="agent-cfo" element={<AgentCFO />} />
         <Route path="iot" element={<SamplePage icon={Radio} titleKey="menu.iot" descriptionKey="page.iot" />} />
         {demoPages.map(({ path, icon, titleKey, descriptionKey }) => (
           <Route
