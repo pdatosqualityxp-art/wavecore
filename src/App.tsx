@@ -22,6 +22,7 @@ import Login from './features/auth/Login';
 import DashboardVentas from './features/dashboard_ventas/DashboardVentas';
 import AgentCompany from './features/agent_company/AgentCompany';
 import AgentCFO from './features/agent_cfo/AgentCFO';
+import AgentCFOChat from './features/agent_cfo_chat/AgentCFOChat';
 import Home from './features/home/Home';
 import TestLogin from './features/test_login/TestLogin';
 
@@ -91,6 +92,7 @@ export default function App() {
         <Route path="dashboard" element={<DashboardVentas />} />
         <Route path="agent-company" element={<AgentCompany />} />
         <Route path="agent-cfo" element={<AgentCFO />} />
+        <Route path="agent-cfo-chat" element={<AgentCFOChat />} />
         <Route path="iot" element={<SamplePage icon={Radio} titleKey="menu.iot" descriptionKey="page.iot" />} />
         {demoPages.map(({ path, icon, titleKey, descriptionKey }) => (
           <Route

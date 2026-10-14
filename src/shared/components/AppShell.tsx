@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   BarChart3,
   BellDot,
+  Bot,
   BriefcaseBusiness,
   ChartPie,
   ChevronDown,
@@ -292,6 +293,15 @@ export default function AppShell() {
           >
             <FileStack size={19} aria-hidden="true" />
             <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.documentRepository')}</span>
+          </NavLink>
+          <NavLink
+            to="/agent-cfo-chat"
+            title={isCollapsed ? t('menu.agentCfoChat') : undefined}
+            aria-label={t('menu.agentCfoChat')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <Bot size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.agentCfoChat')}</span>
           </NavLink>
 
           <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>

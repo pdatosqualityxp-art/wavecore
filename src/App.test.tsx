@@ -85,6 +85,10 @@ describe('App routes', () => {
     expect(await screen.findByRole('heading', { name: 'Repositorio documental' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Repositorio' })).toHaveAttribute('aria-current', 'page');
 
+    fireEvent.click(screen.getByRole('link', { name: 'Agenten Contextual' }));
+    expect(await screen.findByRole('heading', { name: 'Agente contextual CFO' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Agenten Contextual' })).toHaveAttribute('aria-current', 'page');
+
     fireEvent.click(screen.getByRole('link', { name: 'Dashboard Ventas' }));
     expect(await screen.findByRole('heading', { name: 'Resumen comercial' })).toBeInTheDocument();
 
