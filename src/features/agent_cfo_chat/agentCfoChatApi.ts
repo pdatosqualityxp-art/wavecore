@@ -1,8 +1,14 @@
-const REQUEST_TIMEOUT_MS = 55_000;
+const REQUEST_TIMEOUT_MS = 120_000;
 const CHAT_API_PATH = '/api/agent_cfo';
 export const MAX_QUESTION_LENGTH = 2000;
 
-export type CfoSourceType = 'pdf' | 'sales' | 'purchases' | 'stock';
+export type CfoSourceType =
+  | 'pdf'
+  | 'products'
+  | 'table'
+  | 'sales'
+  | 'purchases'
+  | 'stock';
 
 export type CfoSource = {
   id: string;
@@ -11,9 +17,16 @@ export type CfoSource = {
   details: Record<string, unknown>;
 };
 
+export type CfoConsultedSource = {
+  type: 'pdf' | 'table';
+  reference: string;
+};
+
 export type CfoAgentReply = {
   answer: string;
+  model: string;
   sources: CfoSource[];
+  consulted_sources: CfoConsultedSource[];
 };
 
 export type AgentCfoChatErrorKind =
@@ -39,17 +52,33 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isCfoSource(value: unknown): value is CfoSource {
   return isRecord(value)
     && typeof value.id === 'string'
-    && (value.type === 'pdf' || value.type === 'sales' || value.type === 'purchases' || value.type === 'stock')
+    && (
+      value.type === 'pdf'
+      || value.type === 'products'
+      || value.type === 'table'
+      || value.type === 'sales'
+      || value.type === 'purchases'
+      || value.type === 'stock'
+    )
     && typeof value.reference === 'string'
     && isRecord(value.details);
+}
+
+function isCfoConsultedSource(value: unknown): value is CfoConsultedSource {
+  return isRecord(value)
+    && (value.type === 'pdf' || value.type === 'table')
+    && typeof value.reference === 'string';
 }
 
 function isCfoAgentReply(value: unknown): value is CfoAgentReply {
   return isRecord(value)
     && typeof value.answer === 'string'
     && value.answer.trim().length > 0
+    && typeof value.model === 'string'
     && Array.isArray(value.sources)
-    && value.sources.every(isCfoSource);
+    && value.sources.every(isCfoSource)
+    && Array.isArray(value.consulted_sources)
+    && value.consulted_sources.every(isCfoConsultedSource);
 }
 
 function getApiBaseUrl(): string {

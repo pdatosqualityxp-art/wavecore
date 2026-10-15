@@ -16,12 +16,14 @@ describe('agentCfoChatApi', () => {
   it('posts a question to the CFO agent and validates the answer and sources', async () => {
     const reply = {
       answer: 'Las ventas fueron de 125.000 €.',
+      model: 'gemini-3.5-flash-lite',
       sources: [{
         id: 'source-1',
         type: 'sales',
         reference: 'Ventas del cuarto trimestre',
         details: { period: '2025-Q4' },
       }],
+      consulted_sources: [{ type: 'table', reference: 'ventas (informe agregado)' }],
     };
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -38,6 +40,63 @@ describe('agentCfoChatApi', () => {
     expect(options.method).toBe('POST');
     expect(options.headers).toEqual({ 'Content-Type': 'application/json' });
     expect(options.body).toBe(JSON.stringify({ question: '¿Cuáles fueron las ventas?' }));
+  });
+
+  it('accepts product catalog sources', async () => {
+    const reply = {
+      answer: 'Hay productos en el catálogo.\n\nModelo utilizado: gemini-3.5-flash-lite',
+      model: 'gemini-3.5-flash-lite',
+      sources: [{
+        id: 'source-1',
+        type: 'products',
+        reference: 'Producto: Cafetera',
+        details: { id_prod: 'P1', nom_prod: 'Cafetera' },
+      }],
+      consulted_sources: [{ type: 'table', reference: 'productos' }],
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => reply,
+    }));
+
+    await expect(askCfoAgent('¿Puedes ver los productos?')).resolves.toEqual(reply);
+  });
+
+  it('accepts direct business table sources', async () => {
+    const reply = {
+      answer: 'Hay almacenes.\n\nModelo utilizado: gemini-3.5-flash-lite',
+      model: 'gemini-3.5-flash-lite',
+      sources: [{
+        id: 'source-1',
+        type: 'table',
+        reference: 'almacen: A1',
+        details: { table: 'almacen', id_alm: 'A1' },
+      }],
+      consulted_sources: [{ type: 'table', reference: 'almacen' }],
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => reply,
+    }));
+
+    await expect(askCfoAgent('¿Puedes ver los almacenes?')).resolves.toEqual(reply);
+  });
+
+  it('rejects malformed consulted source locations', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        answer: 'Respuesta.',
+        model: 'gemini-3.5-flash-lite',
+        sources: [],
+        consulted_sources: [{ type: 'database', reference: 'ventas' }],
+      }),
+    }));
+
+    await expect(askCfoAgent('consulta')).rejects.toMatchObject({ kind: 'response' });
   });
 
   it('reports missing configuration and invalid requests explicitly', async () => {
@@ -76,7 +135,7 @@ describe('agentCfoChatApi', () => {
 
     const request = askCfoAgent('consulta');
     const timeoutAssertion = expect(request).rejects.toMatchObject({ kind: 'timeout' });
-    await vi.advanceTimersByTimeAsync(55_000);
+    await vi.advanceTimersByTimeAsync(120_000);
     await timeoutAssertion;
   });
 });

@@ -7,6 +7,7 @@ import {
   askCfoAgent,
   type AgentCfoChatErrorKind,
   type CfoAgentReply,
+  type CfoConsultedSource,
   type CfoSourceType,
 } from './agentCfoChatApi';
 
@@ -15,6 +16,7 @@ type ChatMessage = {
   role: 'user' | 'assistant';
   text: string;
   sources?: CfoAgentReply['sources'];
+  consultedSources?: CfoConsultedSource[];
 };
 
 type FailedQuestion = {
@@ -36,9 +38,16 @@ const errorTranslationKeys: Record<AgentCfoChatErrorKind, TranslationKey> = {
 
 const sourceTranslationKeys: Record<CfoSourceType, TranslationKey> = {
   pdf: 'agentCfoChat.sourcePdf',
+  products: 'agentCfoChat.sourceProducts',
+  table: 'agentCfoChat.sourceTable',
   sales: 'agentCfoChat.sourceSales',
   purchases: 'agentCfoChat.sourcePurchases',
   stock: 'agentCfoChat.sourceStock',
+};
+
+const consultedSourceTranslationKeys: Record<CfoConsultedSource['type'], TranslationKey> = {
+  pdf: 'agentCfoChat.consultedPdf',
+  table: 'agentCfoChat.consultedTable',
 };
 
 export default function AgentCFOChat() {
@@ -68,6 +77,7 @@ export default function AgentCFOChat() {
           role: 'assistant',
           text: reply.answer,
           sources: reply.sources,
+          consultedSources: reply.consulted_sources,
         },
       ]);
       setFailedQuestion(null);
@@ -152,11 +162,20 @@ export default function AgentCFOChat() {
                 {message.role === 'user' ? t('agentCfoChat.you') : t('agentCfoChat.assistant')}
               </p>
               <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.text}</p>
-              {message.sources && message.sources.length > 0 && (
+              {((message.consultedSources?.length ?? 0) > 0
+                || (message.sources?.length ?? 0) > 0) && (
                 <div className="mt-3 border-t border-[var(--color-border)] pt-3">
                   <p className="ui-muted mb-2 text-xs font-semibold">{t('agentCfoChat.sources')}</p>
                   <ul className="ui-muted space-y-1 text-xs">
-                    {message.sources.map((source) => (
+                    {message.consultedSources?.map((source, index) => (
+                      <li key={`consulted-${index}`} className="break-words">
+                        <span className="font-semibold">
+                          {t(consultedSourceTranslationKeys[source.type])}:
+                        </span>{' '}
+                        {source.reference}
+                      </li>
+                    ))}
+                    {message.sources?.map((source) => (
                       <li key={source.id} className="break-words">
                         <span className="font-semibold">{t(sourceTranslationKeys[source.type])}:</span>{' '}
                         {source.reference}
