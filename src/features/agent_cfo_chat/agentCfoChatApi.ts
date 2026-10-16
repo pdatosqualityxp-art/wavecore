@@ -1,3 +1,5 @@
+import { getAuthorizationHeader, MissingSessionError } from '../../shared/lib/authHeader';
+
 const REQUEST_TIMEOUT_MS = 55_000;
 const MAX_DETAIL_LENGTH = 200;
 const CHAT_API_PATH = '/api/agent_cfo';
@@ -149,9 +151,10 @@ export async function askCfoAgent(
   try {
     let response: Response;
     try {
+      const authorization = await getAuthorizationHeader();
       response = await fetch(`${getApiBaseUrl()}${CHAT_API_PATH}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authorization },
         body: JSON.stringify({
           question: trimmedQuestion,
           ...(conversationId ? { conversation_id: conversationId } : {}),
@@ -161,6 +164,9 @@ export async function askCfoAgent(
     } catch (error) {
       if (error instanceof AgentCfoChatApiError) {
         throw error;
+      }
+      if (error instanceof MissingSessionError) {
+        throw new AgentCfoChatApiError('auth');
       }
       if (controller.signal.aborted) {
         throw new AgentCfoChatApiError('timeout');

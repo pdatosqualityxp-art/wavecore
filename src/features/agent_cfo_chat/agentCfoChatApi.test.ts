@@ -1,9 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { supabase } from '../../shared/lib/supabase';
 import { AgentCfoChatApiError, askCfoAgent } from './agentCfoChatApi';
+
+vi.mock('../../shared/lib/supabase', () => ({
+  supabase: {
+    auth: { getSession: vi.fn() },
+  },
+}));
 
 describe('agentCfoChatApi', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_API_BASE_URL', 'http://127.0.0.1:8000/');
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'user-jwt', expires_at: Math.floor(Date.now() / 1000) + 3600 } },
+      error: null,
+    } as never);
   });
 
   afterEach(() => {
@@ -39,7 +50,10 @@ describe('agentCfoChatApi', () => {
     const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('http://127.0.0.1:8000/api/agent_cfo');
     expect(options.method).toBe('POST');
-    expect(options.headers).toEqual({ 'Content-Type': 'application/json' });
+    expect(options.headers).toEqual({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer user-jwt',
+    });
     expect(options.body).toBe(JSON.stringify({ question: '¿Cuáles fueron las ventas?' }));
     await expect(
       askCfoAgent(' ¿Cuáles fueron las ventas? ', reply.conversation_id),
@@ -49,6 +63,18 @@ describe('agentCfoChatApi', () => {
       question: '¿Cuáles fueron las ventas?',
       conversation_id: reply.conversation_id,
     }));
+  });
+
+  it('does not call the API without an active session', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    } as never);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(askCfoAgent('consulta')).rejects.toMatchObject({ kind: 'auth' });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('accepts product catalog sources', async () => {

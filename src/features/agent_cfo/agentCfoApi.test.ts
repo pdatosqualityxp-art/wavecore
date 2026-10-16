@@ -5,12 +5,17 @@ import { AgentCfoApiError, ingestDocument, listDocuments } from './agentCfoApi';
 vi.mock('../../shared/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
+    auth: { getSession: vi.fn() },
   },
 }));
 
 describe('agentCfoApi', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_API_BASE_URL', 'http://127.0.0.1:8000/');
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { access_token: 'user-jwt', expires_at: Math.floor(Date.now() / 1000) + 3600 } },
+      error: null,
+    } as never);
   });
 
   afterEach(() => {
@@ -42,7 +47,7 @@ describe('agentCfoApi', () => {
     const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('http://127.0.0.1:8000/api/documents/ingest');
     expect(options.method).toBe('POST');
-    expect(options.headers).toBeUndefined();
+    expect(options.headers).toEqual({ Authorization: 'Bearer user-jwt' });
     expect(options.body).toBeInstanceOf(FormData);
     const body = options.body as FormData;
     expect(body.get('file')).toBe(file);
@@ -66,6 +71,25 @@ describe('agentCfoApi', () => {
       fecha_emision: '2026-01-31',
       resumen_ejecutivo: '',
     })).rejects.toMatchObject({ kind: 'configuration' });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('does not upload without an active session', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
+    } as never);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(ingestDocument({
+      file: new File(['pdf'], 'report.pdf', { type: 'application/pdf' }),
+      titulo: 'Report',
+      tipo_documento: 'Balance',
+      departamento_origen: 'Finance',
+      fecha_emision: '2026-01-31',
+      resumen_ejecutivo: '',
+    })).rejects.toMatchObject({ kind: 'auth' });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

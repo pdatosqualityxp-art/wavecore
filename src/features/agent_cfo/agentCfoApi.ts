@@ -1,4 +1,5 @@
 import { supabase } from '../../shared/lib/supabase';
+import { getAuthorizationHeader, MissingSessionError } from '../../shared/lib/authHeader';
 
 export const MAX_PDF_SIZE_BYTES = 10_000_000;
 
@@ -120,13 +121,18 @@ export async function ingestDocument(input: IngestDocumentInput): Promise<Ingest
 
   let response: Response;
   try {
+    const authorization = await getAuthorizationHeader();
     response = await fetch(`${getApiBaseUrl()}/api/documents/ingest`, {
       method: 'POST',
+      headers: authorization,
       body: formData,
     });
   } catch (error) {
     if (error instanceof AgentCfoApiError) {
       throw error;
+    }
+    if (error instanceof MissingSessionError) {
+      throw new AgentCfoApiError('auth');
     }
     throw new AgentCfoApiError('network');
   }
