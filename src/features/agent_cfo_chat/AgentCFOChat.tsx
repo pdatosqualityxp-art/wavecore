@@ -8,7 +8,6 @@ import {
   type AgentCfoChatErrorKind,
   type CfoAgentReply,
   type CfoConsultedSource,
-  type CfoSourceType,
 } from './agentCfoChatApi';
 
 type ChatMessage = {
@@ -36,18 +35,10 @@ const errorTranslationKeys: Record<AgentCfoChatErrorKind, TranslationKey> = {
   server: 'agentCfoChat.errorServer',
 };
 
-const sourceTranslationKeys: Record<CfoSourceType, TranslationKey> = {
-  pdf: 'agentCfoChat.sourcePdf',
-  products: 'agentCfoChat.sourceProducts',
-  table: 'agentCfoChat.sourceTable',
-  sales: 'agentCfoChat.sourceSales',
-  purchases: 'agentCfoChat.sourcePurchases',
-  stock: 'agentCfoChat.sourceStock',
-};
-
 const consultedSourceTranslationKeys: Record<CfoConsultedSource['type'], TranslationKey> = {
   pdf: 'agentCfoChat.consultedPdf',
   table: 'agentCfoChat.consultedTable',
+  document: 'agentCfoChat.sourcePdf',
 };
 
 export default function AgentCFOChat() {
@@ -57,6 +48,8 @@ export default function AgentCFOChat() {
   const [isSending, setIsSending] = useState(false);
   const [failedQuestion, setFailedQuestion] = useState<FailedQuestion | null>(null);
   const [errorKind, setErrorKind] = useState<AgentCfoChatErrorKind | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const nextMessageId = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -67,9 +60,11 @@ export default function AgentCFOChat() {
   async function requestReply(question: FailedQuestion) {
     setIsSending(true);
     setErrorKind(null);
+    setErrorDetail(null);
 
     try {
-      const reply = await askCfoAgent(question.text);
+      const reply = await askCfoAgent(question.text, conversationId ?? undefined);
+      setConversationId(reply.conversation_id);
       setMessages((current) => [
         ...current,
         {
@@ -86,6 +81,11 @@ export default function AgentCFOChat() {
       const kind = error instanceof AgentCfoChatApiError ? error.kind : 'server';
       setFailedQuestion(question);
       setErrorKind(kind);
+      setErrorDetail(
+        error instanceof AgentCfoChatApiError
+          ? [error.status ? `HTTP ${error.status}` : null, error.detail].filter(Boolean).join(' · ') || null
+          : null,
+      );
       setDraft(question.text);
     } finally {
       setIsSending(false);
@@ -162,8 +162,7 @@ export default function AgentCFOChat() {
                 {message.role === 'user' ? t('agentCfoChat.you') : t('agentCfoChat.assistant')}
               </p>
               <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.text}</p>
-              {((message.consultedSources?.length ?? 0) > 0
-                || (message.sources?.length ?? 0) > 0) && (
+              {(message.consultedSources?.length ?? 0) > 0 && (
                 <div className="mt-3 border-t border-[var(--color-border)] pt-3">
                   <p className="ui-muted mb-2 text-xs font-semibold">{t('agentCfoChat.sources')}</p>
                   <ul className="ui-muted space-y-1 text-xs">
@@ -172,12 +171,6 @@ export default function AgentCFOChat() {
                         <span className="font-semibold">
                           {t(consultedSourceTranslationKeys[source.type])}:
                         </span>{' '}
-                        {source.reference}
-                      </li>
-                    ))}
-                    {message.sources?.map((source) => (
-                      <li key={source.id} className="break-words">
-                        <span className="font-semibold">{t(sourceTranslationKeys[source.type])}:</span>{' '}
                         {source.reference}
                       </li>
                     ))}
@@ -199,7 +192,10 @@ export default function AgentCFOChat() {
         <div className="border-t border-[var(--color-border)] p-4 sm:p-5">
           {errorKind && (
             <div className="ui-chat-error mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm" role="alert">
-              <span>{t(errorTranslationKeys[errorKind])}</span>
+              <span>
+                {t(errorTranslationKeys[errorKind])}
+                {errorDetail && <span className="mt-1 block text-xs opacity-80">{errorDetail}</span>}
+              </span>
               {failedQuestion && errorKind !== 'request' && (
                 <button
                   className="rounded-lg px-3 py-2 font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"

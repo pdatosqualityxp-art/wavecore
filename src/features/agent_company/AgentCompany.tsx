@@ -30,6 +30,7 @@ export default function AgentCompany() {
   const [isSending, setIsSending] = useState(false);
   const [failedQuestion, setFailedQuestion] = useState<FailedQuestion | null>(null);
   const [errorKind, setErrorKind] = useState<ChatApiErrorKind | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const nextMessageId = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +41,7 @@ export default function AgentCompany() {
   async function requestReply(question: FailedQuestion) {
     setIsSending(true);
     setErrorKind(null);
+    setErrorDetail(null);
 
     try {
       const reply = await askCompanyAssistant(question.text);
@@ -54,6 +56,11 @@ export default function AgentCompany() {
       const kind = error instanceof ChatApiError ? error.kind : 'server';
       setFailedQuestion(question);
       setErrorKind(kind);
+      setErrorDetail(
+        error instanceof ChatApiError
+          ? [error.status ? `HTTP ${error.status}` : null, error.detail].filter(Boolean).join(' · ') || null
+          : null,
+      );
       setDraft(question.text);
     } finally {
       setIsSending(false);
@@ -145,7 +152,10 @@ export default function AgentCompany() {
         <div className="border-t border-[var(--color-border)] p-4 sm:p-5">
           {errorKind && (
             <div className="ui-chat-error mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm" role="alert">
-              <span>{t(errorTranslationKeys[errorKind])}</span>
+              <span>
+                {t(errorTranslationKeys[errorKind])}
+                {errorDetail && <span className="mt-1 block text-xs opacity-80">{errorDetail}</span>}
+              </span>
               {failedQuestion && errorKind !== 'request' && (
                 <button
                   className="rounded-lg px-3 py-2 font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"

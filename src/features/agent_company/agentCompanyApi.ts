@@ -7,9 +7,29 @@ const CHAT_API_PATH = '/api/chat';
 export type ChatApiErrorKind = 'auth' | 'network' | 'timeout' | 'request' | 'response' | 'server';
 
 export class ChatApiError extends Error {
-  constructor(readonly kind: ChatApiErrorKind, readonly status?: number) {
+  constructor(
+    readonly kind: ChatApiErrorKind,
+    readonly status?: number,
+    readonly detail?: string,
+  ) {
     super(`Company assistant request failed: ${kind}`);
     this.name = 'ChatApiError';
+  }
+}
+
+async function readErrorDetail(response: Response): Promise<string | undefined> {
+  try {
+    const body: unknown = await response.json();
+    if (typeof body !== 'object' || body === null) {
+      return undefined;
+    }
+    const record = body as Record<string, unknown>;
+    const value = [record.detail, record.error, record.message].find(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0,
+    );
+    return value?.trim().slice(0, 200);
+  } catch {
+    return undefined;
   }
 }
 
@@ -74,7 +94,7 @@ export async function askCompanyAssistant(message: string): Promise<string> {
           : response.status === 401
             ? 'auth'
             : 'server';
-        throw new ChatApiError(kind, response.status);
+        throw new ChatApiError(kind, response.status, await readErrorDetail(response));
       }
 
       let data: unknown;

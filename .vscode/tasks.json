@@ -7,10 +7,12 @@
       "label": "npm: dev",
       "isBackground": true,
       "problemMatcher": {
+        "owner": "vite",
         "pattern": [
           {
-            "regexp": "^$",
-            "message": 0
+            "regexp": "^(?!)(.*)$",
+            "file": 1,
+            "message": 1
           }
         ],
         "background": {

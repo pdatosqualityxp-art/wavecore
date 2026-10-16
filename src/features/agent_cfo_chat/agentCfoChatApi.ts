@@ -1,4 +1,5 @@
-const REQUEST_TIMEOUT_MS = 120_000;
+const REQUEST_TIMEOUT_MS = 55_000;
+const MAX_DETAIL_LENGTH = 200;
 const CHAT_API_PATH = '/api/agent_cfo';
 export const MAX_QUESTION_LENGTH = 2000;
 
@@ -18,13 +19,14 @@ export type CfoSource = {
 };
 
 export type CfoConsultedSource = {
-  type: 'pdf' | 'table';
+  type: 'pdf' | 'table' | 'document';
   reference: string;
 };
 
 export type CfoAgentReply = {
   answer: string;
   model: string;
+  conversation_id: string;
   sources: CfoSource[];
   consulted_sources: CfoConsultedSource[];
 };
@@ -39,9 +41,29 @@ export type AgentCfoChatErrorKind =
   | 'server';
 
 export class AgentCfoChatApiError extends Error {
-  constructor(readonly kind: AgentCfoChatErrorKind, readonly status?: number) {
+  constructor(
+    readonly kind: AgentCfoChatErrorKind,
+    readonly status?: number,
+    readonly detail?: string,
+  ) {
     super(`CFO agent request failed: ${kind}`);
     this.name = 'AgentCfoChatApiError';
+  }
+}
+
+async function readErrorDetail(response: Response): Promise<string | undefined> {
+  try {
+    const body: unknown = await response.json();
+    if (typeof body !== 'object' || body === null) {
+      return undefined;
+    }
+    const record = body as Record<string, unknown>;
+    const value = [record.detail, record.error, record.message].find(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0,
+    );
+    return value?.trim().slice(0, MAX_DETAIL_LENGTH);
+  } catch {
+    return undefined;
   }
 }
 
@@ -66,8 +88,13 @@ function isCfoSource(value: unknown): value is CfoSource {
 
 function isCfoConsultedSource(value: unknown): value is CfoConsultedSource {
   return isRecord(value)
-    && (value.type === 'pdf' || value.type === 'table')
+    && (value.type === 'pdf' || value.type === 'table' || value.type === 'document')
     && typeof value.reference === 'string';
+}
+
+function isUuid(value: unknown): value is string {
+  return typeof value === 'string'
+    && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 }
 
 function isCfoAgentReply(value: unknown): value is CfoAgentReply {
@@ -75,6 +102,7 @@ function isCfoAgentReply(value: unknown): value is CfoAgentReply {
     && typeof value.answer === 'string'
     && value.answer.trim().length > 0
     && typeof value.model === 'string'
+    && isUuid(value.conversation_id)
     && Array.isArray(value.sources)
     && value.sources.every(isCfoSource)
     && Array.isArray(value.consulted_sources)
@@ -102,9 +130,16 @@ function getApiBaseUrl(): string {
   return configuredUrl.replace(/\/+$/, '');
 }
 
-export async function askCfoAgent(question: string): Promise<CfoAgentReply> {
+export async function askCfoAgent(
+  question: string,
+  conversationId?: string,
+): Promise<CfoAgentReply> {
   const trimmedQuestion = question.trim();
-  if (!trimmedQuestion || trimmedQuestion.length > MAX_QUESTION_LENGTH) {
+  if (
+    !trimmedQuestion
+    || trimmedQuestion.length > MAX_QUESTION_LENGTH
+    || (conversationId !== undefined && !isUuid(conversationId))
+  ) {
     throw new AgentCfoChatApiError('request');
   }
 
@@ -117,7 +152,10 @@ export async function askCfoAgent(question: string): Promise<CfoAgentReply> {
       response = await fetch(`${getApiBaseUrl()}${CHAT_API_PATH}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: trimmedQuestion }),
+        body: JSON.stringify({
+          question: trimmedQuestion,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+        }),
         signal: controller.signal,
       });
     } catch (error) {
@@ -136,7 +174,7 @@ export async function askCfoAgent(question: string): Promise<CfoAgentReply> {
         : response.status === 401 || response.status === 403
           ? 'auth'
           : 'server';
-      throw new AgentCfoChatApiError(kind, response.status);
+      throw new AgentCfoChatApiError(kind, response.status, await readErrorDetail(response));
     }
 
     let data: unknown;

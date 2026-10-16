@@ -17,6 +17,7 @@ describe('agentCfoChatApi', () => {
     const reply = {
       answer: 'Las ventas fueron de 125.000 €.',
       model: 'gemini-3.5-flash-lite',
+      conversation_id: '490af1b6-7b43-4b09-a941-a528ee5bf7bf',
       sources: [{
         id: 'source-1',
         type: 'sales',
@@ -40,12 +41,21 @@ describe('agentCfoChatApi', () => {
     expect(options.method).toBe('POST');
     expect(options.headers).toEqual({ 'Content-Type': 'application/json' });
     expect(options.body).toBe(JSON.stringify({ question: '¿Cuáles fueron las ventas?' }));
+    await expect(
+      askCfoAgent(' ¿Cuáles fueron las ventas? ', reply.conversation_id),
+    ).resolves.toEqual(reply);
+    const [, followUpOptions] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(followUpOptions.body).toBe(JSON.stringify({
+      question: '¿Cuáles fueron las ventas?',
+      conversation_id: reply.conversation_id,
+    }));
   });
 
   it('accepts product catalog sources', async () => {
     const reply = {
       answer: 'Hay productos en el catálogo.\n\nModelo utilizado: gemini-3.5-flash-lite',
       model: 'gemini-3.5-flash-lite',
+      conversation_id: '490af1b6-7b43-4b09-a941-a528ee5bf7bf',
       sources: [{
         id: 'source-1',
         type: 'products',
@@ -67,6 +77,7 @@ describe('agentCfoChatApi', () => {
     const reply = {
       answer: 'Hay almacenes.\n\nModelo utilizado: gemini-3.5-flash-lite',
       model: 'gemini-3.5-flash-lite',
+      conversation_id: '490af1b6-7b43-4b09-a941-a528ee5bf7bf',
       sources: [{
         id: 'source-1',
         type: 'table',
@@ -91,6 +102,7 @@ describe('agentCfoChatApi', () => {
       json: async () => ({
         answer: 'Respuesta.',
         model: 'gemini-3.5-flash-lite',
+        conversation_id: '490af1b6-7b43-4b09-a941-a528ee5bf7bf',
         sources: [],
         consulted_sources: [{ type: 'database', reference: 'ventas' }],
       }),
@@ -108,6 +120,7 @@ describe('agentCfoChatApi', () => {
     vi.stubEnv('VITE_API_BASE_URL', 'http://127.0.0.1:8000');
     await expect(askCfoAgent('   ')).rejects.toMatchObject({ kind: 'request' });
     await expect(askCfoAgent('q'.repeat(2001))).rejects.toMatchObject({ kind: 'request' });
+    await expect(askCfoAgent('consulta', 'not-a-uuid')).rejects.toMatchObject({ kind: 'request' });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -121,9 +134,31 @@ describe('agentCfoChatApi', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ answer: 'Respuesta sin fuentes válidas', sources: [{}] }),
+      json: async () => ({
+        answer: 'Respuesta sin fuentes válidas',
+        model: 'gemini-3.5-flash-lite',
+        conversation_id: '490af1b6-7b43-4b09-a941-a528ee5bf7bf',
+        sources: [{}],
+        consulted_sources: [],
+      }),
     }));
     await expect(askCfoAgent('consulta')).rejects.toBeInstanceOf(AgentCfoChatApiError);
+    await expect(askCfoAgent('consulta')).rejects.toMatchObject({ kind: 'response' });
+  });
+
+  it('rejects a response without a valid conversation ID', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        answer: 'Respuesta.',
+        model: 'gemini-3.5-flash-lite',
+        conversation_id: 'invalid',
+        sources: [],
+        consulted_sources: [],
+      }),
+    }));
+
     await expect(askCfoAgent('consulta')).rejects.toMatchObject({ kind: 'response' });
   });
 
@@ -135,7 +170,7 @@ describe('agentCfoChatApi', () => {
 
     const request = askCfoAgent('consulta');
     const timeoutAssertion = expect(request).rejects.toMatchObject({ kind: 'timeout' });
-    await vi.advanceTimersByTimeAsync(120_000);
+    await vi.advanceTimersByTimeAsync(55_000);
     await timeoutAssertion;
   });
 });
