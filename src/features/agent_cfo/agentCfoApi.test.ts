@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { supabase } from '../../shared/lib/supabase';
-import { AgentCfoApiError, ingestDocument, listDocuments } from './agentCfoApi';
+import { AgentCfoApiError, getDocumentSignedUrl, ingestDocument, listDocuments } from './agentCfoApi';
 
 vi.mock('../../shared/lib/supabase', () => ({
   supabase: {
@@ -24,6 +24,39 @@ describe('agentCfoApi', () => {
     vi.restoreAllMocks();
   });
 
+  it('creates a short-lived signed URL from the stored path in the private bucket', async () => {
+    const createSignedUrl = vi.fn().mockResolvedValue({ data: { signedUrl: 'https://storage.example/signed?token=abc' }, error: null });
+    const from = vi.fn().mockReturnValue({ createSignedUrl });
+    (supabase as unknown as { storage: unknown }).storage = { from };
+
+    await expect(getDocumentSignedUrl('CFO_PDFs/doc-1.pdf')).resolves.toEqual({
+      signed_url: 'https://storage.example/signed?token=abc',
+      expires_in: 60,
+    });
+    expect(from).toHaveBeenCalledWith('waveStorageTest');
+    expect(createSignedUrl).toHaveBeenCalledWith('CFO_PDFs/doc-1.pdf', 60);
+  });
+
+  it('rejects arbitrary paths, invalid responses and storage failures', async () => {
+    const createSignedUrl = vi.fn();
+    (supabase as unknown as { storage: unknown }).storage = { from: vi.fn().mockReturnValue({ createSignedUrl }) };
+
+    await expect(getDocumentSignedUrl('other/secret.pdf')).rejects.toMatchObject({ kind: 'request' });
+    await expect(getDocumentSignedUrl('CFO_PDFs/../x.pdf')).rejects.toMatchObject({ kind: 'request' });
+    expect(createSignedUrl).not.toHaveBeenCalled();
+
+    createSignedUrl.mockResolvedValueOnce({ data: { signedUrl: 'javascript:alert(1)' }, error: null });
+    await expect(getDocumentSignedUrl('CFO_PDFs/doc-1.pdf')).rejects.toMatchObject({ kind: 'response' });
+
+    createSignedUrl.mockResolvedValueOnce({ data: null, error: { status: 403 } });
+    await expect(getDocumentSignedUrl('CFO_PDFs/doc-1.pdf')).rejects.toMatchObject({ kind: 'auth' });
+
+    createSignedUrl.mockResolvedValueOnce({ data: null, error: { statusCode: '404' } });
+    await expect(getDocumentSignedUrl('CFO_PDFs/doc-1.pdf')).rejects.toMatchObject({ kind: 'request' });
+
+    createSignedUrl.mockRejectedValueOnce(new TypeError('offline'));
+    await expect(getDocumentSignedUrl('CFO_PDFs/doc-1.pdf')).rejects.toMatchObject({ kind: 'network' });
+  });
   it('sends the document fields as multipart form data and validates the 201 response', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

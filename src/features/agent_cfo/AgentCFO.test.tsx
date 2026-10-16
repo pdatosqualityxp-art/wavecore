@@ -1,7 +1,7 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+﻿import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LanguageProvider } from '../../shared/i18n/LanguageContext';
-import { AgentCfoApiError, ingestDocument, listDocuments, type DocumentRecord } from './agentCfoApi';
+import { AgentCfoApiError, getDocumentSignedUrl, ingestDocument, listDocuments, type DocumentRecord } from './agentCfoApi';
 import AgentCFO from './AgentCFO';
 
 vi.mock('../../shared/lib/supabase', () => ({
@@ -15,6 +15,7 @@ vi.mock('./agentCfoApi', async (importOriginal) => {
   return {
     ...actual,
     ingestDocument: vi.fn(),
+    getDocumentSignedUrl: vi.fn(),
     listDocuments: vi.fn(),
   };
 });
@@ -128,6 +129,53 @@ describe('AgentCFO', () => {
     expect(screen.getAllByRole('alert').map((alert) => alert.textContent).join(' '))
       .toContain('Completa todos los campos obligatorios.');
     expect(ingestDocument).not.toHaveBeenCalled();
+  });
+
+  it('opens the PDF viewer with a signed URL, and clears it on close', async () => {
+    vi.mocked(listDocuments).mockResolvedValue([savedDocument, { ...savedDocument, id_documento: 'doc-2', titulo: 'Otro' }]);
+    vi.mocked(getDocumentSignedUrl).mockResolvedValue({ signed_url: 'https://storage.example/signed?t=1', expires_in: 60 });
+    renderPage();
+
+    const trigger = await screen.findByRole('button', { name: 'Ver: Informe anual' });
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    const dialog = await screen.findByRole('dialog', { name: /Vista previa: Informe anual/ });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    const frame = await screen.findByTitle(/Visor PDF: Informe anual/);
+    expect(frame).toHaveAttribute('src', 'https://storage.example/signed?t=1');
+    expect(getDocumentSignedUrl).toHaveBeenCalledWith('CFO_PDFs/doc-1.pdf');
+    expect(screen.getByRole('link', { name: 'Abrir en otra pestaña' })).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.getByRole('button', { name: 'Ver: Otro' })).toBeInTheDocument();
+
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(document.body.innerHTML).not.toContain('storage.example');
+    expect(trigger).toHaveFocus();
+    expect(listDocuments).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a loading state, then an error with retry for the viewer', async () => {
+    vi.mocked(listDocuments).mockResolvedValue([savedDocument]);
+    let resolveFirst: (error: Error) => void = () => undefined;
+    vi.mocked(getDocumentSignedUrl)
+      .mockImplementationOnce(() => new Promise((_, reject) => { resolveFirst = reject; }))
+      .mockResolvedValueOnce({ signed_url: 'https://storage.example/signed?t=2', expires_in: 60 });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Ver: Informe anual' }));
+    expect(await screen.findByText('Solicitando acceso seguro al documento…')).toBeInTheDocument();
+
+    resolveFirst(new AgentCfoApiError('network'));
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo contactar con la API');
+    expect(screen.queryByTitle(/Visor PDF/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(await screen.findByTitle(/Visor PDF/)).toHaveAttribute('src', 'https://storage.example/signed?t=2');
+    expect(getDocumentSignedUrl).toHaveBeenCalledTimes(2);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar vista previa' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('shows list read failures distinctly from an empty repository', async () => {

@@ -1,4 +1,4 @@
-import { supabase } from '../../shared/lib/supabase';
+﻿import { supabase } from '../../shared/lib/supabase';
 import { getAuthorizationHeader, MissingSessionError } from '../../shared/lib/authHeader';
 
 export const MAX_PDF_SIZE_BYTES = 10_000_000;
@@ -155,6 +155,56 @@ export async function ingestDocument(input: IngestDocumentInput): Promise<Ingest
   return data;
 }
 
+export type DocumentSignedUrl = {
+  signed_url: string;
+  expires_in: number;
+};
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'https:' || protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+export const DOCUMENTS_BUCKET = 'waveStorageTest';
+const SIGNED_URL_TTL_SECONDS = 60;
+const STORAGE_PATH_PATTERN = /^CFO_PDFs\/[A-Za-z0-9._-]+\.pdf$/i;
+
+// The path comes from the `documentos` row already read under the user's RLS, never from free user input.
+export async function getDocumentSignedUrl(storagePath: string): Promise<DocumentSignedUrl> {
+  if (!STORAGE_PATH_PATTERN.test(storagePath) || storagePath.includes('..')) {
+    throw new AgentCfoApiError('request');
+  }
+
+  let result: Awaited<ReturnType<ReturnType<typeof supabase.storage.from>['createSignedUrl']>>;
+  try {
+    result = await supabase.storage.from(DOCUMENTS_BUCKET).createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
+  } catch {
+    throw new AgentCfoApiError('network');
+  }
+
+  const { data, error } = result;
+  if (error) {
+    const status = (error as { status?: number; statusCode?: string | number }).status
+      ?? Number((error as { statusCode?: string | number }).statusCode);
+    if (status === 401 || status === 403) {
+      throw new AgentCfoApiError('auth', status);
+    }
+    if (status === 400 || status === 404) {
+      throw new AgentCfoApiError('request', status);
+    }
+    throw new AgentCfoApiError('server');
+  }
+
+  if (!data || typeof data.signedUrl !== 'string' || !isHttpUrl(data.signedUrl)) {
+    throw new AgentCfoApiError('response');
+  }
+
+  return { signed_url: data.signedUrl, expires_in: SIGNED_URL_TTL_SECONDS };
+}
 export async function listDocuments(): Promise<DocumentRecord[]> {
   try {
     const { data, error } = await supabase

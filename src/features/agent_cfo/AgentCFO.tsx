@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { FileStack, LoaderCircle, RefreshCw, Upload, X } from 'lucide-react';
+import { Eye, FileStack, LoaderCircle, RefreshCw, Upload, X } from 'lucide-react';
 import { useTranslation } from '../../shared/i18n/LanguageContext';
+import DocumentViewerDialog from './DocumentViewerDialog';
 import {
   AgentCfoApiError,
   MAX_PDF_SIZE_BYTES,
@@ -50,6 +51,7 @@ export default function AgentCFO() {
   const [requiredError, setRequiredError] = useState(false);
   const [uploadError, setUploadError] = useState<AgentCfoApiErrorKind | null>(null);
   const [uploadSucceeded, setUploadSucceeded] = useState(false);
+  const [viewedDocument, setViewedDocument] = useState<{ id: string; path: string; title: string } | null>(null);
   const [title, setTitle] = useState('');
   const [documentType, setDocumentType] = useState('');
   const [department, setDepartment] = useState('');
@@ -306,7 +308,7 @@ export default function AgentCFO() {
                 {isUploading ? t('agentCFO.uploading') : t('agentCFO.submit')}
               </button>
               <button
-                className="ui-button ui-button-secondary rounded-xl px-4 py-2.5 text-sm font-semibold"
+                className="ui-button ui-button-primary rounded-xl px-4 py-2.5 text-sm font-semibold"
                 disabled={isUploading}
                 onClick={closeForm}
                 type="button"
@@ -379,12 +381,32 @@ export default function AgentCFO() {
                       <dd className="ui-heading mt-1">{formatDate(document.created_at, language)}</dd>
                     </div>
                   </dl>
+                  <div className="sm:col-span-2">
+                    <button
+                      aria-label={`${t('agentCFO.view')}: ${document.titulo}`}
+                      className="ui-button ui-button-secondary inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium"
+                      onClick={() => setViewedDocument({ id: document.id_documento, path: document.url_storage, title: document.titulo })}
+                      type="button"
+                    >
+                      <Eye size={15} aria-hidden="true" />
+                      {t('agentCFO.view')}
+                    </button>
+                  </div>
                 </article>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {viewedDocument && (
+        <DocumentViewerDialog
+          key={viewedDocument.id}
+          onClose={() => setViewedDocument(null)}
+          storagePath={viewedDocument.path}
+          title={viewedDocument.title}
+        />
+      )}
     </section>
   );
 }

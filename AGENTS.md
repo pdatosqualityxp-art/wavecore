@@ -87,6 +87,12 @@ El layout principal está implementado con `AppShell` y debe seguir el patrón a
 
 La interfaz debe ser responsive y compatible con modo claro y oscuro.
 
+### Botones de acción
+
+* Los botones de acción (subir, enviar, cancelar, guardar, confirmar, etc.) en todas las pantallas, formularios, diálogos y visores usan `ui-button ui-button-primary`, con el mismo color y estilo.
+* El aspecto de `ui-button-primary` en modo claro debe ser idéntico al del modo oscuro: los tokens `--color-accent-gradient` y `--color-accent-gradient-hover` comparten valores en `:root` y `.dark`. No definir colores de botón por feature ni diferenciar el estilo entre temas.
+* `ui-button-secondary` se reserva para controles auxiliares no accionales (por ejemplo, actualizar o ver).
+
 ## 5. Navegación y rutas
 
 La navegación principal del proyecto es la que existe en la app actual:
