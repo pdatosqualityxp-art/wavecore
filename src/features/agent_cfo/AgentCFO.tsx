@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Eye, FileStack, LoaderCircle, RefreshCw, Upload, X } from 'lucide-react';
+import { useAuth } from '../../shared/context/AuthContext';
 import { useTranslation } from '../../shared/i18n/LanguageContext';
 import DocumentViewerDialog from './DocumentViewerDialog';
 import {
@@ -40,6 +41,8 @@ function formatDate(value: string | null, language: string, dateOnly = false): s
 }
 
 export default function AgentCFO() {
+  const { user } = useAuth();
+  const isAnonymous = user?.is_anonymous ?? false;
   const { language, t } = useTranslation();
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,6 +88,10 @@ export default function AgentCFO() {
 
   async function submitDocument(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isAnonymous) {
+      return;
+    }
+
     setUploadError(null);
     setUploadSucceeded(false);
 
@@ -299,14 +306,20 @@ export default function AgentCFO() {
             {requiredError && <p className="ui-user-menu-error sm:col-span-2" role="alert">{t('agentCFO.errorRequired')}</p>}
 
             <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
-              <button
-                className="ui-button ui-button-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
-                disabled={isUploading}
-                type="submit"
-              >
-                {isUploading && <LoaderCircle className="animate-spin" size={16} aria-hidden="true" />}
-                {isUploading ? t('agentCFO.uploading') : t('agentCFO.submit')}
-              </button>
+              {isAnonymous ? (
+                <p className="ui-user-menu-error text-sm" role="alert">
+                  {t('agentCFO.guestUploadForbidden')}
+                </p>
+              ) : (
+                <button
+                  className="ui-button ui-button-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
+                  disabled={isUploading}
+                  type="submit"
+                >
+                  {isUploading && <LoaderCircle className="animate-spin" size={16} aria-hidden="true" />}
+                  {isUploading ? t('agentCFO.uploading') : t('agentCFO.submit')}
+                </button>
+              )}
               <button
                 className="ui-button ui-button-primary rounded-xl px-4 py-2.5 text-sm font-semibold"
                 disabled={isUploading}

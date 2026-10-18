@@ -77,20 +77,28 @@ describe('App routes', () => {
       name: 'Una visión ejecutiva unificada para crecimiento, mercado e IoT.',
     })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('link', { name: 'Consulta de empresa' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Asistente Virtual' }));
     expect(await screen.findByRole('heading', { name: 'Asistente virtual corporativo' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Consulta de empresa' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Asistente Virtual' })).toHaveAttribute('aria-current', 'page');
 
     fireEvent.click(screen.getByRole('link', { name: 'Repositorio' }));
     expect(await screen.findByRole('heading', { name: 'Repositorio documental' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Repositorio' })).toHaveAttribute('aria-current', 'page');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Agenten Contextual' }));
-    expect(await screen.findByRole('heading', { name: 'Agente contextual CFO' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Agenten Contextual' })).toHaveAttribute('aria-current', 'page');
+    fireEvent.click(screen.getByRole('link', { name: 'Agente A.I.' }));
+    expect(await screen.findByRole('heading', { name: 'Agente A.I.' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Agente A.I.' })).toHaveAttribute('aria-current', 'page');
 
     fireEvent.click(screen.getByRole('link', { name: 'Dashboard Ventas' }));
     expect(await screen.findByRole('heading', { name: 'Resumen comercial' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('link', { name: 'Plantilla de dashboard' }));
+    expect(await screen.findByRole('heading', { name: 'Resumen comercial' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Plantilla de dashboard' })).toHaveAttribute('aria-current', 'page');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Control Servicios' }));
+    expect(await screen.findByRole('heading', { name: 'Control Servicios' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Control Servicios' })).toHaveAttribute('aria-current', 'page');
 
     fireEvent.click(screen.getByRole('link', { name: 'IoT' }));
     expect(await screen.findByRole('heading', { name: 'IoT' })).toBeInTheDocument();

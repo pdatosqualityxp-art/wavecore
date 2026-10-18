@@ -20,6 +20,10 @@ import { useAuth } from './shared/context/AuthContext';
 import { useTranslation } from './shared/i18n/LanguageContext';
 import Login from './features/auth/Login';
 import DashboardVentas from './features/dashboard_ventas/DashboardVentas';
+import ControlServicios from './features/control_servicios/ControlServicios';
+import Intervenciones from './features/intervenciones/Intervenciones';
+import DashboardCopy from './features/dashboard_copy/DashboardCopy';
+import AnalisisCompras from './features/analisis_compras/AnalisisCompras';
 import AgentCompany from './features/agent_company/AgentCompany';
 import AgentCFO from './features/agent_cfo/AgentCFO';
 import AgentCFOChat from './features/agent_cfo_chat/AgentCFOChat';
@@ -90,6 +94,10 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="stack" element={<SamplePage icon={Cpu} titleKey="menu.stack" descriptionKey="page.stack" />} />
         <Route path="dashboard" element={<DashboardVentas />} />
+        <Route path="control-servicios" element={<ControlServicios />} />
+        <Route path="intervenciones" element={<Intervenciones />} />
+        <Route path="dashboard-template" element={<DashboardCopy />} />
+        <Route path="analisis-compras" element={<AnalisisCompras />} />
         <Route path="agent-company" element={<AgentCompany />} />
         <Route path="agent-cfo" element={<AgentCFO />} />
         <Route path="agent-cfo-chat" element={<AgentCFOChat />} />

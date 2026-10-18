@@ -30,6 +30,7 @@ describe('AgentCompany', () => {
 
     expect(screen.getByRole('heading', { name: 'Asistente virtual corporativo' })).toBeInTheDocument();
     expect(screen.getByText('¿En qué puedo ayudarte? Escribe una pregunta sobre la empresa.')).toBeInTheDocument();
+    expect(screen.queryByText('El registro persistente de conversaciones queda pendiente de configurar.')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Enviar pregunta' })).toBeDisabled();
 
     fireEvent.change(screen.getByRole('textbox', { name: 'Escribe tu pregunta' }), {

@@ -397,6 +397,84 @@
   background: var(--color-ranking-products-gradient);
 }
 
+.ui-ranking-fill-stock {
+  background: var(--color-ranking-stock-gradient);
+}
+
+.ui-control-status-open { background: var(--color-status-open); }
+.ui-control-status-progress { background: var(--color-status-progress); }
+.ui-control-status-completed { background: var(--color-status-completed); }
+.ui-control-status-other { background: var(--color-text-subtle); }
+.ui-interventions-table {
+  border-collapse: collapse;
+  background: var(--color-surface);
+}
+.ui-interventions-table th {
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ui-interventions-row {
+  border-bottom: 1px solid var(--color-border-strong);
+  transition: background-color 150ms ease;
+}
+.ui-interventions-row:last-child { border-bottom: 0; }
+.ui-interventions-row:hover { background: var(--color-surface-raised); }
+.ui-interventions-id { font-weight: 650; }
+.ui-intervention-dot-open {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--color-status-open) 72%, white), var(--color-status-open));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-status-open) 30%, transparent);
+}
+.ui-intervention-dot-progress {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--color-status-progress) 72%, white), var(--color-status-progress));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-status-progress) 30%, transparent);
+}
+.ui-intervention-dot-completed {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--color-status-completed) 72%, white), var(--color-status-completed));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-status-completed) 30%, transparent);
+}
+.ui-intervention-dot-other { background: var(--color-text-subtle); }
+.ui-intervention-status {
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  white-space: nowrap;
+}
+.ui-intervention-status-open { color: var(--color-status-open); }
+.ui-intervention-status-progress { color: var(--color-status-progress); }
+.ui-intervention-status-completed { color: var(--color-status-completed); }
+.ui-intervention-status-other { color: var(--color-text-muted); }
+.ui-control-fill-maintenance { background: var(--color-service-maintenance); }
+.ui-control-fill-repair { background: var(--color-service-repair); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-interventions-row { transition: none; }
+}
+
+.ui-ranking-avatar {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid var(--color-accent-border);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ui-cost-metric {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+}
+
 .ui-geography-card {
   min-height: 17rem;
 }

@@ -39,8 +39,14 @@ describe('AgentCFOChat', () => {
     });
     renderPage();
 
-    expect(screen.getByRole('heading', { name: 'Agente contextual CFO' })).toBeInTheDocument();
-    fireEvent.change(screen.getByRole('textbox', { name: 'Escribe tu consulta' }), {
+    expect(screen.getByRole('heading', { name: 'Agente A.I.' })).toBeInTheDocument();
+    expect(screen.getByText('¿En qué te puedo ayudar? Puedo analizar los documentos y los datos de la empresa para ayudarte a encontrar respuestas y tomar decisiones.')).toBeInTheDocument();
+    const queryInput = screen.getByRole('textbox', { name: 'Escribe tu consulta' });
+    expect(queryInput).toHaveAttribute(
+      'placeholder',
+      'Por ejemplo: Según los contratos de ventas ¿Tenemos stock suficiente?',
+    );
+    fireEvent.change(queryInput, {
       target: { value: '¿Cuáles fueron las ventas?' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Enviar consulta' }));

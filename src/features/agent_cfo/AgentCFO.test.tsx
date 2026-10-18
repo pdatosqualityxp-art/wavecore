@@ -1,5 +1,7 @@
 ﻿import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { User } from '@supabase/supabase-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useAuth } from '../../shared/context/AuthContext';
 import { LanguageProvider } from '../../shared/i18n/LanguageContext';
 import { AgentCfoApiError, getDocumentSignedUrl, ingestDocument, listDocuments, type DocumentRecord } from './agentCfoApi';
 import AgentCFO from './AgentCFO';
@@ -8,6 +10,10 @@ vi.mock('../../shared/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
   },
+}));
+
+vi.mock('../../shared/context/AuthContext', () => ({
+  useAuth: vi.fn(),
 }));
 
 vi.mock('./agentCfoApi', async (importOriginal) => {
@@ -31,9 +37,26 @@ const savedDocument: DocumentRecord = {
   created_at: '2026-02-01T12:00:00Z',
 };
 
+function mockAuthUser(isAnonymous: boolean) {
+  vi.mocked(useAuth).mockReturnValue({
+    user: {
+      id: 'test-user',
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      created_at: '2026-01-01T00:00:00Z',
+      is_anonymous: isAnonymous,
+    } as User,
+    profile: null,
+    profileStatus: 'loaded',
+    isLoading: false,
+  });
+}
+
 describe('AgentCFO', () => {
   beforeEach(() => {
     localStorage.clear();
+    mockAuthUser(false);
     vi.mocked(listDocuments).mockResolvedValue([]);
     vi.mocked(ingestDocument).mockResolvedValue({
       id_documento: savedDocument.id_documento,
@@ -69,6 +92,22 @@ describe('AgentCFO', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Subir documento' }));
     expect(screen.getByRole('heading', { name: 'Añadir documento' })).toBeInTheDocument();
     expect(screen.getByLabelText('Archivo PDF')).toHaveAttribute('accept', '.pdf,application/pdf');
+  });
+
+  it('hides the submit button and blocks PDF uploads for anonymous users', async () => {
+    mockAuthUser(true);
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: 'Subir documento' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Función no permitida para invitado.');
+    expect(screen.queryByRole('button', { name: 'Enviar documento' })).not.toBeInTheDocument();
+
+    const form = screen.getByRole('heading', { name: 'Añadir documento' }).closest('section')?.querySelector('form');
+    if (!form) {
+      throw new Error('Upload form was not rendered');
+    }
+    fireEvent.submit(form);
+    expect(ingestDocument).not.toHaveBeenCalled();
   });
 
   it('submits a valid PDF and refreshes the Supabase-backed list', async () => {

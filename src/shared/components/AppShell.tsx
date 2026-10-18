@@ -4,6 +4,7 @@ import {
   BellDot,
   Bot,
   BriefcaseBusiness,
+  ChartColumnBig,
   ChartPie,
   ChevronDown,
   ClipboardList,
@@ -26,6 +27,7 @@ import {
   Sun,
   Target,
   UserRound,
+  Wrench,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
@@ -271,6 +273,42 @@ export default function AppShell() {
           >
             <BarChart3 size={19} aria-hidden="true" />
             <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.dashboard')}</span>
+          </NavLink>
+          <NavLink
+            to="/dashboard-template"
+            title={isCollapsed ? t('menu.dashboardTemplate') : undefined}
+            aria-label={t('menu.dashboardTemplate')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <ChartPie size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.dashboardTemplate')}</span>
+          </NavLink>
+          <NavLink
+            to="/analisis-compras"
+            title={isCollapsed ? t('menu.purchasesAnalysis') : undefined}
+            aria-label={t('menu.purchasesAnalysis')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <ChartColumnBig size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.purchasesAnalysis')}</span>
+          </NavLink>
+          <NavLink
+            to="/control-servicios"
+            title={isCollapsed ? t('menu.controlServices') : undefined}
+            aria-label={t('menu.controlServices')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <Wrench size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.controlServices')}</span>
+          </NavLink>
+          <NavLink
+            to="/intervenciones"
+            title={isCollapsed ? t('menu.interventions') : undefined}
+            aria-label={t('menu.interventions')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <ClipboardList size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.interventions')}</span>
           </NavLink>
           <NavLink
             to="/agent-company"

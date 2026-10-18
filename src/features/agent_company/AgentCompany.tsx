@@ -191,7 +191,6 @@ export default function AgentCompany() {
               <span className="hidden sm:inline">{t('agentCompany.send')}</span>
             </button>
           </form>
-          <p className="ui-muted mt-3 text-xs leading-5">{t('agentCompany.privacy')}</p>
         </div>
       </div>
     </section>
