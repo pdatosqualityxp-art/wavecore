@@ -1,32 +1,27 @@
 import { useEffect, useState } from 'react';
 import {
   BarChart3,
-  BellDot,
+  Boxes,
   Bot,
-  BriefcaseBusiness,
   ChartColumnBig,
-  ChartPie,
   ChevronDown,
   ClipboardList,
   Cpu,
-  DatabaseZap,
   FileStack,
-  Factory,
-  FileText,
-  FolderKanban,
-  Gauge,
-  Globe2,
   Home,
   LogOut,
   Menu,
   MessageCircle,
   Moon,
+  Package,
+  Shapes,
   PanelLeftClose,
-  Radio,
-  ShieldCheck,
+  Receipt,
+  ShoppingCart,
   Sun,
-  Target,
+  Truck,
   UserRound,
+  Users,
   Wrench,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -116,22 +111,12 @@ export default function AppShell() {
     }
   }
 
-  const demoMenuItems = [
-    { to: '/demo-1', labelKey: 'menu.test1', icon: FolderKanban },
-    { to: '/demo-2', labelKey: 'menu.test2', icon: BriefcaseBusiness },
-    { to: '/demo-3', labelKey: 'menu.test3', icon: ChartPie },
-    { to: '/demo-4', labelKey: 'menu.test4', icon: ClipboardList },
-    { to: '/demo-5', labelKey: 'menu.test5', icon: DatabaseZap },
-    { to: '/demo-6', labelKey: 'menu.test6', icon: Factory },
-    { to: '/demo-7', labelKey: 'menu.test7', icon: FileText },
-    { to: '/demo-8', labelKey: 'menu.test8', icon: BellDot },
-    { to: '/demo-9', labelKey: 'menu.test9', icon: ShieldCheck },
-    { to: '/demo-10', labelKey: 'menu.test10', icon: Target },
-    { to: '/demo-11', labelKey: 'menu.test11', icon: Cpu },
-    { to: '/demo-12', labelKey: 'menu.test12', icon: Gauge },
-    { to: '/demo-13', labelKey: 'menu.test13', icon: Radio },
-    { to: '/demo-14', labelKey: 'menu.test14', icon: FolderKanban },
-    { to: '/demo-15', labelKey: 'menu.test15', icon: Target },
+  const dataMenuItems = [
+    { to: '/ventas', labelKey: 'menu.sales', icon: ShoppingCart },
+    { to: '/productos', labelKey: 'menu.products', icon: Package },
+    { to: '/proveedores-compo', labelKey: 'menu.componentSuppliers', icon: Truck },
+    { to: '/compras', labelKey: 'menu.purchases', icon: Receipt },
+    { to: '/componentes', labelKey: 'menu.components', icon: Boxes },
   ] as const;
 
   return (
@@ -153,7 +138,7 @@ export default function AppShell() {
           aria-label={t('brand.name')}
         >
           <img src={logo} alt="" className="h-8 w-8 object-contain" />
-          <span className="ui-heading text-base font-bold">{t('brand.name')}</span>
+          <span className="ui-heading text-base font-bold italic">{t('brand.name')}</span>
         </button>
         <button
           type="button"
@@ -195,7 +180,7 @@ export default function AppShell() {
           ) : (
             <div className="hidden min-w-0 flex-1 items-center gap-2 md:flex">
               <img src={logo} alt="" className="h-8 w-8 shrink-0 object-contain" />
-              <span className="ui-heading truncate text-base font-bold tracking-tight">
+              <span className="ui-heading truncate text-base font-bold italic tracking-tight">
                 {t('brand.name')}
               </span>
             </div>
@@ -208,7 +193,7 @@ export default function AppShell() {
             className="flex min-w-0 flex-1 items-center gap-2 md:hidden"
           >
             <img src={logo} alt="" className="h-8 w-8 shrink-0 object-contain" />
-            <span className="ui-heading truncate text-base font-bold tracking-tight">{t('brand.name')}</span>
+            <span className="ui-heading truncate text-base font-bold italic tracking-tight">{t('brand.name')}</span>
           </button>
 
           {!isCollapsed && (
@@ -275,15 +260,6 @@ export default function AppShell() {
             <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.dashboard')}</span>
           </NavLink>
           <NavLink
-            to="/dashboard-template"
-            title={isCollapsed ? t('menu.dashboardTemplate') : undefined}
-            aria-label={t('menu.dashboardTemplate')}
-            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
-          >
-            <ChartPie size={19} aria-hidden="true" />
-            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.dashboardTemplate')}</span>
-          </NavLink>
-          <NavLink
             to="/analisis-compras"
             title={isCollapsed ? t('menu.purchasesAnalysis') : undefined}
             aria-label={t('menu.purchasesAnalysis')}
@@ -343,22 +319,31 @@ export default function AppShell() {
           </NavLink>
 
           <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>
-            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.internetOfThings')}</span>
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.catalog')}</span>
           </div>
           <NavLink
-            to="/iot"
-            title={isCollapsed ? t('menu.iot') : undefined}
-            aria-label={t('menu.iot')}
+            to="/modelos"
+            title={isCollapsed ? t('menu.models') : undefined}
+            aria-label={t('menu.models')}
             className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
           >
-            <Globe2 size={19} aria-hidden="true" />
-            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.iot')}</span>
+            <Shapes size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.models')}</span>
           </NavLink>
 
           <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>
-            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.tests')}</span>
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.data')}</span>
           </div>
-          {demoMenuItems.map(({ to, labelKey, icon: Icon }) => (
+          <NavLink
+            to="/clientes"
+            title={isCollapsed ? t('menu.clients') : undefined}
+            aria-label={t('menu.clients')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <Users size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.clients')}</span>
+          </NavLink>
+          {dataMenuItems.map(({ to, labelKey, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -370,6 +355,19 @@ export default function AppShell() {
               <span className={isCollapsed ? 'md:hidden' : ''}>{t(labelKey)}</span>
             </NavLink>
           ))}
+
+          <div className={`ui-nav-section ${isCollapsed ? 'md:px-1' : ''}`}>
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.information')}</span>
+          </div>
+          <NavLink
+            to="/feature/stack_info"
+            title={isCollapsed ? t('menu.stack') : undefined}
+            aria-label={t('menu.stack')}
+            className={({ isActive }) => `ui-nav-item ${isActive ? 'ui-nav-item-active' : ''} ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+          >
+            <Cpu size={19} aria-hidden="true" />
+            <span className={isCollapsed ? 'md:hidden' : ''}>{t('menu.stack')}</span>
+          </NavLink>
         </nav>
 
         <footer className={`ui-sidebar-footer mx-2 shrink-0 border-t px-1 pb-4 pt-3 ${isCollapsed ? 'md:mx-1 md:px-0' : ''}`}>

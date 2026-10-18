@@ -22,6 +22,12 @@ import Login from './features/auth/Login';
 import DashboardVentas from './features/dashboard_ventas/DashboardVentas';
 import ControlServicios from './features/control_servicios/ControlServicios';
 import Intervenciones from './features/intervenciones/Intervenciones';
+import Clientes from './features/clientes/Clientes';
+import Ventas from './features/ventas/Ventas';
+import Productos from './features/productos/Productos';
+import ProveedoresCompo from './features/proveedores_compo/ProveedoresCompo';
+import Compras from './features/compras/Compras';
+import Componentes from './features/componentes/Componentes';
 import DashboardCopy from './features/dashboard_copy/DashboardCopy';
 import AnalisisCompras from './features/analisis_compras/AnalisisCompras';
 import AgentCompany from './features/agent_company/AgentCompany';
@@ -29,6 +35,8 @@ import AgentCFO from './features/agent_cfo/AgentCFO';
 import AgentCFOChat from './features/agent_cfo_chat/AgentCFOChat';
 import Home from './features/home/Home';
 import TestLogin from './features/test_login/TestLogin';
+import StackInfo from './features/stack_info/StackInfo';
+import Modelos from './features/modelos/Modelos';
 
 type TranslationKey = Parameters<ReturnType<typeof useTranslation>['t']>[0];
 
@@ -92,15 +100,23 @@ export default function App() {
     <Routes>
       <Route path="/" element={<RootRoute />}>
         <Route index element={<Home />} />
-        <Route path="stack" element={<SamplePage icon={Cpu} titleKey="menu.stack" descriptionKey="page.stack" />} />
+        <Route path="stack" element={<Navigate to="/feature/stack_info" replace />} />
+        <Route path="feature/stack_info" element={<StackInfo />} />
         <Route path="dashboard" element={<DashboardVentas />} />
         <Route path="control-servicios" element={<ControlServicios />} />
         <Route path="intervenciones" element={<Intervenciones />} />
+        <Route path="clientes" element={<Clientes />} />
+        <Route path="ventas" element={<Ventas />} />
+        <Route path="productos" element={<Productos />} />
+        <Route path="proveedores-compo" element={<ProveedoresCompo />} />
+        <Route path="compras" element={<Compras />} />
+        <Route path="componentes" element={<Componentes />} />
         <Route path="dashboard-template" element={<DashboardCopy />} />
         <Route path="analisis-compras" element={<AnalisisCompras />} />
         <Route path="agent-company" element={<AgentCompany />} />
         <Route path="agent-cfo" element={<AgentCFO />} />
         <Route path="agent-cfo-chat" element={<AgentCFOChat />} />
+        <Route path="modelos" element={<Modelos />} />
         <Route path="iot" element={<SamplePage icon={Radio} titleKey="menu.iot" descriptionKey="page.iot" />} />
         {demoPages.map(({ path, icon, titleKey, descriptionKey }) => (
           <Route

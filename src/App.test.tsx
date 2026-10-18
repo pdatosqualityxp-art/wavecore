@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,19 +49,21 @@ describe('App routes', () => {
 
   afterEach(cleanup);
 
-  it('navigates between the home page and all sample pages', async () => {
+  function renderApp(initialEntries = ['/']) {
     render(
       <ThemeProvider>
         <LanguageProvider>
           <AuthProvider>
-            <MemoryRouter initialEntries={['/']}>
+            <MemoryRouter initialEntries={initialEntries}>
               <App />
             </MemoryRouter>
           </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>,
     );
+  }
 
+  function authenticate() {
     act(() => {
       authListener?.('INITIAL_SESSION', {
         user: {
@@ -72,48 +74,51 @@ describe('App routes', () => {
         },
       } as Session);
     });
+  }
+
+  it('navigates between the home page and available routes', async () => {
+    renderApp();
+
+    authenticate();
 
     expect(await screen.findByRole('heading', {
-      name: 'Una visión ejecutiva unificada para crecimiento, mercado e IoT.',
+      name: 'Una visión ejecutiva unificada para crecimiento y oportunidades de mercado.',
     })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('link', { name: 'Asistente Virtual' }));
+    const navigation = screen.getByRole('navigation', { name: 'Navegación principal' });
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Asistente Virtual' }));
     expect(await screen.findByRole('heading', { name: 'Asistente virtual corporativo' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Asistente Virtual' })).toHaveAttribute('aria-current', 'page');
+    expect(within(navigation).getByRole('link', { name: 'Asistente Virtual' })).toHaveAttribute('aria-current', 'page');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Repositorio' }));
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Repositorio' }));
     expect(await screen.findByRole('heading', { name: 'Repositorio documental' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Repositorio' })).toHaveAttribute('aria-current', 'page');
+    expect(within(navigation).getByRole('link', { name: 'Repositorio' })).toHaveAttribute('aria-current', 'page');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Agente A.I.' }));
-    expect(await screen.findByRole('heading', { name: 'Agente A.I.' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Agente A.I.' })).toHaveAttribute('aria-current', 'page');
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Agente I.A.' }));
+    expect(await screen.findByRole('heading', { name: 'Agente I.A.' })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: 'Agente I.A.' })).toHaveAttribute('aria-current', 'page');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Dashboard Ventas' }));
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Dashboard Ventas' }));
     expect(await screen.findByRole('heading', { name: 'Resumen comercial' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('link', { name: 'Plantilla de dashboard' }));
-    expect(await screen.findByRole('heading', { name: 'Resumen comercial' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Plantilla de dashboard' })).toHaveAttribute('aria-current', 'page');
-
-    fireEvent.click(screen.getByRole('link', { name: 'Control Servicios' }));
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Control Servicios' }));
     expect(await screen.findByRole('heading', { name: 'Control Servicios' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Control Servicios' })).toHaveAttribute('aria-current', 'page');
+    expect(within(navigation).getByRole('link', { name: 'Control Servicios' })).toHaveAttribute('aria-current', 'page');
 
-    fireEvent.click(screen.getByRole('link', { name: 'IoT' }));
-    expect(await screen.findByRole('heading', { name: 'IoT' })).toBeInTheDocument();
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Stack Tecnológico' }));
+    expect(await screen.findByRole('heading', { name: 'Stack Tecnológico' })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: 'Stack Tecnológico' })).toHaveAttribute('aria-current', 'page');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Inicio' }));
-    expect(await screen.findByRole('heading', {
-      name: 'Una visión ejecutiva unificada para crecimiento, mercado e IoT.',
-    })).toBeInTheDocument();
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Modelos' }));
+    expect(await screen.findByRole('heading', { name: 'Modelos' })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: 'Modelos' })).toHaveAttribute('aria-current', 'page');
+  });
 
-    fireEvent.click(screen.getByRole('link', { name: 'IoT' }));
-    expect(await screen.findByRole('heading', { name: 'IoT' })).toBeInTheDocument();
+  it('redirects the legacy stack route to the new feature route', async () => {
+    renderApp(['/stack']);
+    authenticate();
 
-    fireEvent.click(screen.getByRole('link', { name: 'Inicio' }));
-    expect(await screen.findByRole('heading', {
-      name: 'Una visión ejecutiva unificada para crecimiento, mercado e IoT.',
-    })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Stack Tecnológico' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Stack Tecnológico' })).toHaveAttribute('aria-current', 'page');
   });
 });

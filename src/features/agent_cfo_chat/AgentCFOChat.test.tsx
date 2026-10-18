@@ -39,7 +39,7 @@ describe('AgentCFOChat', () => {
     });
     renderPage();
 
-    expect(screen.getByRole('heading', { name: 'Agente A.I.' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Agente I.A.' })).toBeInTheDocument();
     expect(screen.getByText('¿En qué te puedo ayudar? Puedo analizar los documentos y los datos de la empresa para ayudarte a encontrar respuestas y tomar decisiones.')).toBeInTheDocument();
     const queryInput = screen.getByRole('textbox', { name: 'Escribe tu consulta' });
     expect(queryInput).toHaveAttribute(
