@@ -126,3 +126,20 @@ Carga e ingesta de documentos internos mediante la API CFO, con visor de documen
 Chat en modo razonamiento que combina la documentación interna del repositorio y la base de datos para responder.
 
 - Ruta: `/agent-cfo-chat`.
+
+## URL's del proyecto
+
+
+Repositorios Gitub
+- Frontend: https://github.com/pdatosqualityxp-art/wavecore
+- Backend 1 (Asistente Virtual): https://github.com/pdatosqualityxp-art/wavecore-api-company
+- Backend 2(Agente IA): https://github.com/pdatosqualityxp-art/wavecore-api-cfo
+
+Proyecto web
+- https://wavecore-nu.vercel.app/
+
+Video Presentación
+- https://youtu.be/e3hetOQ9dTs
+
+Slides
+- https://drive.google.com/file/d/1PPOlemVgnnDC3nPDB5zsyOqKlYcmbNxe/view?usp=sharing
