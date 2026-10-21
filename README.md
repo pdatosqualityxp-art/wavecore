@@ -1,55 +1,128 @@
 # WaveCore
 
-Aplicación React + Vite con autenticación de Supabase, acceso de invitado anónimo, modo claro/oscuro y traducciones en español, catalán e inglés.
+Plataforma full stack con IA generativa para analítica empresarial y RAG documental.
 
-Después de iniciar sesión se abre `/test_login`, un explorador de diagnóstico que muestra hasta 50 filas de las tablas indicadas en `VITE_SUPABASE_TABLES`. Indica nombres separados por comas, por ejemplo `customers,products`; las consultas usan la sesión activa y respetan permisos y políticas RLS. La lista explícita evita depender de la introspección OpenAPI de PostgREST, que puede requerir una clave secreta y no se debe exponer en el navegador.
+## Descripción general
 
-## Configuración local
+WaveCore es una aplicación web que combina cuatro capacidades sobre los datos de la empresa:
 
-1. Instala las dependencias con `npm install`.
-2. Copia `.env.example` a `.env` y configura `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` con la URL del proyecto y su clave pública (anon/publishable), y `VITE_SUPABASE_TABLES` con una lista separada por comas de tablas del esquema `public` que quieras mostrar. Para el repositorio documental, `VITE_API_BASE_URL` debe apuntar a `http://127.0.0.1:8000` mientras ejecutas la API CFO local. En producción, configúrala con la URL pública de la API en Render antes de compilar/desplegar el frontend; Vite incorpora este valor en el bundle. Esta variable no debe contener secretos. El chat llama a `/api/chat` en el mismo origen: Vite lo reenvía al backend desplegado durante el desarrollo y Vercel lo reenvía en producción, evitando depender de CORS desde el navegador. `VITE_AGENT_COMPANY_API_URL` es opcional y cambia el destino del proxy local; por defecto usa `https://wavecore-api-company.vercel.app`. Para usar un backend local, configúrala como `http://localhost:3000`. No uses una `service_role` ni una clave secreta en el cliente.
-3. En Supabase, habilita el proveedor de acceso anónimo y el proveedor Email en los ajustes de Authentication.
-4. Inicia la aplicación con `npm run dev`.
+- **Dashboards:** indicadores y gráficos de ventas, compras, servicios e intervenciones, alimentados por Supabase.
+- **Asistente virtual:** chat que consulta la base de datos en tiempo real (modo analítico en caliente).
+- **Repositorio documental:** carga e ingesta de documentos internos para su uso en RAG.
+- **Agente de IA:** consulta la documentación interna y la base de datos y responde en modo razonamiento.
 
-## Ejecutar y depurar en VS Code
+La interfaz es responsive, admite modo claro y oscuro y está disponible en español, catalán e inglés. El acceso es mediante Supabase Auth, con inicio de sesión por email o como invitado anónimo.
 
-1. Abre la carpeta del proyecto en VS Code e instala las dependencias con `npm install`.
-2. Copia `.env.example` a `.env` y configura las variables de Supabase, incluyendo la lista `VITE_SUPABASE_TABLES` y `VITE_API_BASE_URL` para el backend que vayas a utilizar.
-3. Abre **Run and Debug** (`Ctrl+Shift+D`), selecciona **WaveCore: Chrome** y pulsa `F5`. VS Code iniciará Vite y abrirá Chrome conectado al depurador. Puedes poner breakpoints en los archivos TypeScript/TSX.
+## Stack tecnológico
 
-## Permisos de lectura para invitados
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 18, Vite, TypeScript |
+| Estilos | Tailwind CSS 4 y sistema de diseño propio (`ui-*`) |
+| Navegación | React Router |
+| Iconos | lucide-react |
+| Autenticación y datos | Supabase (`@supabase/supabase-js`) |
+| Pruebas | Vitest y React Testing Library |
+| Despliegue del frontend | Vercel |
 
-Los inicios de sesión anónimos reciben el rol `authenticated` y el claim `is_anonymous: true`. Habilita RLS en cada tabla expuesta y crea una política de lectura limitada a ese claim. Sustituye `mi_tabla` por cada tabla que el invitado deba consultar:
+### Backends externos
 
-```sql
--- 1. Borramos la política restrictiva anterior
-DROP POLICY IF EXISTS "Guests can read z_test" ON public.z_test;
+El frontend se conecta a dos servicios externos:
 
--- 2. Creamos una política que permita leer a los anónimos O a los usuarios autenticados normales
-create policy "Authenticated users and guests can read z_test"
-on public.z_test
-for select
-to authenticated
-using (
-  (select auth.jwt() ->> 'is_anonymous') = 'true' 
-  OR 
-  (select auth.jwt() ->> 'is_anonymous') IS NOT DISTINCT FROM 'false'
-  -- O simplemente permitiendo a todo el rol 'authenticated' como vimos al principio:
-  -- true
-);
+- **API Company**, desplegada en Vercel: asistente virtual (`/api/chat`).
+- **API CFO**, desplegada en Render: repositorio documental y agente de IA.
+
+## Instalación
+
+Requisitos: Node.js y npm.
+
+1. Instala las dependencias:
+
+   ```bash
+   npm install
+   ```
+
+2. Copia `.env.example` a `.env` y completa las variables:
+
+   | Variable | Descripción |
+   |---|---|
+   | `VITE_SUPABASE_URL` | URL del proyecto de Supabase. |
+   | `VITE_SUPABASE_ANON_KEY` | Clave pública (anon/publishable). |
+   | `VITE_SUPABASE_TABLES` | Tablas del esquema `public` separadas por comas. |
+   | `VITE_AGENT_COMPANY_API_URL` | Destino del proxy local de la API Company. |
+   | `VITE_API_BASE_URL` | URL de la API CFO. |
+
+   No uses claves `service_role` ni secretas en el cliente.
+
+3. En Supabase (Authentication), habilita los proveedores de acceso anónimo y de email.
+
+## Ejecución
+
+- Desarrollo: `npm run dev`. La aplicación queda en `http://localhost:5173`. El puerto es fijo: si está ocupado, Vite no arrancará.
+- Pruebas: `npm test`.
+- Build de producción: `npm run build`.
+
+También puedes depurar desde VS Code: abre **Run and Debug**, selecciona **WaveCore: Chrome** y pulsa `F5`.
+
+En desarrollo, las peticiones a `/api` se reenvían mediante el proxy de Vite a la API Company; en producción lo hace Vercel. `VITE_API_BASE_URL` se incorpora al bundle en la compilación, por lo que debe apuntar a la API CFO correcta antes de compilar o desplegar.
+
+## Estructura del proyecto
+
+```text
+src/
+├── App.tsx                  # Rutas principales
+├── main.tsx                 # Arranque de la aplicación
+├── styles.css               # Tailwind y sistema de diseño
+├── assets/                  # Logo e imágenes de modelos
+├── design/
+│   ├── tokens.css           # Tokens semánticos de color y estado
+│   └── components.css       # Clases reutilizables `ui-*`
+├── features/                # Módulos por funcionalidad
+│   ├── auth/                # Inicio de sesión
+│   ├── home/                # Inicio
+│   ├── dashboard_ventas/    # Dashboard de ventas
+│   ├── analisis_compras/    # Análisis de compras
+│   ├── control_servicios/   # Control de servicios
+│   ├── intervenciones/      # Intervenciones
+│   ├── clientes/, ventas/, productos/, compras/,
+│   │   componentes/, proveedores_compo/   # Datos
+│   ├── modelos/             # Catálogo de modelos
+│   ├── agent_company/       # Asistente virtual
+│   ├── agent_cfo/           # Repositorio documental
+│   ├── agent_cfo_chat/      # Agente de IA
+│   ├── stack_info/          # Información del stack
+│   └── test_login/          # Explorador de diagnóstico
+├── shared/
+│   ├── components/          # AppShell, selector de idioma, tablas
+│   ├── context/             # Auth y tema
+│   ├── i18n/                # Traducciones ca, es y en
+│   └── lib/                 # Cliente Supabase y utilidades
+└── test/                    # Configuración de pruebas
+spec/                        # Especificaciones funcionales
 ```
 
-No crees políticas de `insert`, `update` o `delete` para invitados. Las políticas RLS que ya existan para `authenticated` también pueden aplicarse a usuarios anónimos: revisa las políticas de escritura y añade una condición que excluya `is_anonymous = 'true'` si deben seguir disponibles para usuarios autenticados normales, por ejemplo:
+## Funcionalidades especiales
 
-```sql
--- Añade estas condiciones a las políticas de escritura existentes:
-using ((select auth.jwt() ->> 'is_anonymous') is distinct from 'true')
-with check ((select auth.jwt() ->> 'is_anonymous') is distinct from 'true')
-```
+### Dashboards
 
-Conserva en cada política las demás condiciones que ya tenga; las políticas permisivas de RLS se combinan con `OR`. Aplica la política de lectura únicamente a las tablas y filas necesarias. Revisa también permisos de tablas relacionadas, vistas, funciones RPC y Storage; RLS de una tabla no concede ni restringe automáticamente el acceso a esos otros recursos.
+Tarjetas KPI y gráficos sobre datos reales de Supabase, con filtros, y estados de carga, error y sin datos. Los valores se muestran también como texto accesible y se respeta `prefers-reduced-motion`.
 
-## Verificación
+- Rutas: `/dashboard`, `/analisis-compras`, `/control-servicios`, `/intervenciones`.
 
-- `npm test`: ejecuta las pruebas con Vitest.
-- `npm run build`: comprueba los tipos de TypeScript y genera el build de producción.
+### Asistente virtual
+
+Chat que consulta la base de datos en tiempo real (modo analítico en caliente) a través de la API Company.
+
+- Ruta: `/agent-company`.
+
+### Repositorio documental
+
+Carga e ingesta de documentos internos mediante la API CFO, con visor de documentos.
+
+- Ruta: `/agent-cfo`.
+
+### Agente de IA
+
+Chat en modo razonamiento que combina la documentación interna del repositorio y la base de datos para responder.
+
+- Ruta: `/agent-cfo-chat`.
